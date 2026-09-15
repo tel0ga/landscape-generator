@@ -43,7 +43,7 @@ public static class ObjectsGenerator
             int y = Random.Range(0, simplifiedHeight) * spacing;
             Vector2 pos = offset + new Vector2(topLeftX + x, topLeftY - y);
             float pointHeight = heightMap[x, y];
-            if (pointHeight > 0.1f && !filled.Contains(pos))     //0.1f - высота, начиная с которой растут деревья
+            if (pointHeight > 0.25f && !filled.Contains(pos))     //0.25f - высота, начиная с которой растут деревья
             {
                 float randChoice = Random.Range(0f, 1f);        // случайная дробь от 0 до 1
                 string objectName;

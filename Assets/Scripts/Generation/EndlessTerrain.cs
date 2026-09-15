@@ -6,7 +6,7 @@ using UnityEngine;
 public class EndlessTerain : MonoBehaviour
 {
     [SerializeField]
-    public static float maxViewDst = 150;
+    public static float maxViewDst = 400;
 
     [SerializeField]
     public static float existDst = 2000;
@@ -31,7 +31,7 @@ public class EndlessTerain : MonoBehaviour
     public Material mapMaterial;         // для PixelColours
     public Material shaderMapMaterial;   // ⬅️ НОВОЕ: для ShaderTextures
 
-    public static int treeSpacing = 15;
+    public static int treeSpacing = 30;
 
     static Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
     static List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
@@ -193,7 +193,7 @@ public class EndlessTerain : MonoBehaviour
             }
 
             // Деревья
-            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 20, position, treeSpacing);
+            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 10, position, treeSpacing);
             natureGameObjects = new GameObject[natureObjects.Length];
 
             hasMapData = true;

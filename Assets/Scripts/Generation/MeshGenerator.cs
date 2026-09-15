@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System;
-using System.Threading;
 
 public static class MeshGenerator
 {
@@ -8,33 +6,32 @@ public static class MeshGenerator
     {
         int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
+
         float topLeftX = (width - 1) / -2f;
         float topLeftY = (height - 1) / 2f;
 
-        int meshSimplificationIncrement = (levelOfDetail==0)?1:levelOfDetail * 2;
-        int verticesPerLine = (width - 1) / meshSimplificationIncrement + 1;
+        // Всегда 4 вершины и 2 треугольника
+        MeshData meshData = new MeshData(2, 2);
 
-        MeshData meshData = new MeshData(width, height);
-        int vertexIndex = 0;
+        // Вершины: TL, TR, BL, BR
+        meshData.vertices[0] = new Vector3(topLeftX, topLeftY, 0); // top-left
+        meshData.vertices[1] = new Vector3(topLeftX + width - 1, topLeftY, 0); // top-right
+        meshData.vertices[2] = new Vector3(topLeftX, topLeftY - (height - 1), 0); // bottom-left
+        meshData.vertices[3] = new Vector3(topLeftX + width - 1, topLeftY - (height - 1), 0); // bottom-right
 
-        for (int y = 0; y < height; y+=meshSimplificationIncrement)
-        {
-            for (int x = 0; x < width; x += meshSimplificationIncrement)
-            {
-                meshData.vertices[vertexIndex] = new Vector3(topLeftX+x, topLeftY-y, 0);
-                meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
-                if (x < width - 1 && y < height - 1)
-                {
-                    meshData.AddTriangle(vertexIndex, vertexIndex + verticesPerLine + 1, vertexIndex + verticesPerLine);
-                    meshData.AddTriangle(vertexIndex + verticesPerLine + 1, vertexIndex, vertexIndex + 1);
-                }
-                vertexIndex++;
-            }
-        }
+        // UV
+        meshData.uvs[0] = new Vector2(0, 1);
+        meshData.uvs[1] = new Vector2(1, 1);
+        meshData.uvs[2] = new Vector2(0, 0);
+        meshData.uvs[3] = new Vector2(1, 0);
+
+        // Треугольники (по часовой стрелке, если смотреть на -Z)
+        meshData.AddTriangle(0, 1, 2);
+        meshData.AddTriangle(1, 3, 2);
+
         return meshData;
     }
 }
-
 
 public class MeshData
 {

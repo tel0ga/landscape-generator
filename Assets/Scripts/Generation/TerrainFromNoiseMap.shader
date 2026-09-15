@@ -12,14 +12,22 @@ Shader "Custom/TerrainFromNoiseMap"
         _WetSandTex ("Wet Sand", 2D) = "white" {}
         _SandTex ("Sand", 2D) = "white" {}
         _GrassTex ("Grass", 2D) = "white" {}
+        _DarkGrassTex ("Dark Grass", 2D) = "white" {}
+        _Rock1Tex ("Rock 1", 2D) = "white" {}
+        _Rock2Tex ("Rock 2", 2D) = "white" {}
+        _SnowTex ("Snow", 2D) = "white" {}
 
         _TexScale ("Texture Scale", Float) = 0.1
 
         _WaterThreshold ("Water -> Wet Sand", Float) = 0.0
         _WetSandThreshold ("Wet Sand -> Sand", Float) = 0.04
         _SandThreshold ("Sand -> Grass", Float) = 0.17
+        _GrassThreshold ("Grass -> Dark Grass", Float) = 0.35
+        _DarkGrassThreshold ("Dark Grass -> Rock 1", Float) = 0.55
+        _Rock1Threshold ("Rock 1 -> Rock 2", Float) = 0.75
+        _Rock2Threshold ("Rock 2 -> Snow", Float) = 0.9
 
-        _BlendWidth ("Blend Width", Range(0.01, 1)) = 0.1
+        _BlendWidth ("Blend Width", Range(0, 1)) = 0.1
     }
     SubShader
     {
@@ -50,9 +58,11 @@ Shader "Custom/TerrainFromNoiseMap"
             float _ChunkSize;
 
             sampler2D _WaterTex, _WetSandTex, _SandTex, _GrassTex;
+            sampler2D _DarkGrassTex, _Rock1Tex, _Rock2Tex, _SnowTex;
             float _TexScale;
 
             float _WaterThreshold, _WetSandThreshold, _SandThreshold;
+            float _GrassThreshold, _DarkGrassThreshold, _Rock1Threshold, _Rock2Threshold;
             float _BlendWidth;
 
             v2f vert(appdata v)
@@ -78,27 +88,48 @@ Shader "Custom/TerrainFromNoiseMap"
                 // 2. Денормализация в сырой диапазон
                 float hRaw = lerp(_NoiseMin, _NoiseMax, noiseRaw);
 
-                // 3. Веса слоёв
-                float wWater_to_WetSand = smoothWeight(hRaw, _WaterThreshold,   _BlendWidth);
-                float wWetSand_to_Sand  = smoothWeight(hRaw, _WetSandThreshold, _BlendWidth);
-                float wSand_to_Grass    = smoothWeight(hRaw, _SandThreshold,    _BlendWidth);
+                // 3. Веса переходов между слоями
+                float t0 = smoothWeight(hRaw, _WaterThreshold,      _BlendWidth);
+                float t1 = smoothWeight(hRaw, _WetSandThreshold,    _BlendWidth);
+                float t2 = smoothWeight(hRaw, _SandThreshold,       _BlendWidth);
+                float t3 = smoothWeight(hRaw, _GrassThreshold,      _BlendWidth);
+                float t4 = smoothWeight(hRaw, _DarkGrassThreshold,  _BlendWidth);
+                float t5 = smoothWeight(hRaw, _Rock1Threshold,      _BlendWidth);
+                float t6 = smoothWeight(hRaw, _Rock2Threshold,      _BlendWidth);
 
-                float wWater   = 1 - wWater_to_WetSand;
-                float wWetSand = wWater_to_WetSand * (1 - wWetSand_to_Sand);
-                float wSand    = wWetSand_to_Sand * (1 - wSand_to_Grass);
-                float wGrass   = wSand_to_Grass;
+                // 4. Итоговые веса слоёв (цепочка "ступенек")
+                float wWater     = 1 - t0;
+                float wWetSand   = t0 * (1 - t1);
+                float wSand      = t1 * (1 - t2);
+                float wGrass     = t2 * (1 - t3);
+                float wDarkGrass = t3 * (1 - t4);
+                float wRock1     = t4 * (1 - t5);
+                float wRock2     = t5 * (1 - t6);
+                float wSnow      = t6;
 
-                // 4. UV текстур из мировых координат
+                // 5. UV текстур из мировых координат
                 float2 texUV = i.worldPos.xy * _TexScale;
 
-                // 5. Сэмплируем 4 текстуры
-                float4 water   = tex2D(_WaterTex,   texUV);
-                float4 wetSand = tex2D(_WetSandTex, texUV);
-                float4 sand    = tex2D(_SandTex,    texUV);
-                float4 grass   = tex2D(_GrassTex,   texUV);
+                // 6. Сэмплируем 8 текстур
+                float4 water     = tex2D(_WaterTex,     texUV);
+                float4 wetSand   = tex2D(_WetSandTex,   texUV);
+                float4 sand      = tex2D(_SandTex,      texUV);
+                float4 grass     = tex2D(_GrassTex,     texUV);
+                float4 darkGrass = tex2D(_DarkGrassTex, texUV);
+                float4 rock1     = tex2D(_Rock1Tex,     texUV);
+                float4 rock2     = tex2D(_Rock2Tex,     texUV);
+                float4 snow      = tex2D(_SnowTex,      texUV);
 
-                // 6. Смешиваем
-                float4 result = water * wWater + wetSand * wWetSand + sand * wSand + grass * wGrass;
+                // 7. Смешиваем
+                float4 result =
+                      water     * wWater
+                    + wetSand   * wWetSand
+                    + sand      * wSand
+                    + grass     * wGrass
+                    + darkGrass * wDarkGrass
+                    + rock1     * wRock1
+                    + rock2     * wRock2
+                    + snow      * wSnow;
 
                 return result;
             }

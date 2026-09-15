@@ -21,6 +21,8 @@ public class MapGenerator : MonoBehaviour
     public float persistance;
     public float lacunarity;
 
+    public float riverDepth = 1f;
+
     public int seed;
     public Vector2 offset;
     public float upperHeight = 0f;
@@ -115,7 +117,20 @@ public class MapGenerator : MonoBehaviour
             centre + offset, upperHeight,
             out float minNoise, out float maxNoise
         );
+        /*float[,] riverMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed + 999,                        // РЕКИИИ
+            noiseScale * 1, 4, persistance, lacunarity, centre + offset,0f,out _, out _);
 
+        for (int y = 0; y < mapChunkSize; y++)
+        {
+            for (int x = 0; x < mapChunkSize; x++)
+            {
+                float riverNoise = Mathf.Abs(riverMap[x, y] - 0.5f) * 2f;
+                riverNoise = 1f - riverNoise;
+                riverNoise = Mathf.Pow(riverNoise, 8f);
+                noiseMap[x, y] -= riverNoise * riverDepth;
+            }
+        }
+        */
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
 
         for (int y = 0; y < mapChunkSize; y++)
