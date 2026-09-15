@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5584697a92e94924396bbb72c330b7b8
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _NoiseMap: {instanceID: 0}
+  - _WaterTex: {fileID: 2800000, guid: d87221e70b7b9444abae6f5143c53917, type: 3}
+  - _WetSandTex: {fileID: 2800000, guid: c2dc65d4ee26a7f48b90e1213ae65c97, type: 3}
+  - _SandTex: {fileID: 2800000, guid: 92515a08967e3e54fbedb5ab9ebcf54d, type: 3}
+  - _GrassTex: {fileID: 2800000, guid: d96b312ff1b6a1344ad8e868a1095153, type: 3}
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,9 +1,13 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System.Collections;
 
 public static class Noise
 {
-    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset, float upperHeight)
+    public static float[,] GenerateNoiseMap(
+        int mapWidth, int mapHeight, int seed, float scale,
+        int octaves, float persistance, float lacunarity,
+        Vector2 offset, float upperHeight,
+        out float outMin, out float outMax)   // в¬…пёЏ РќРћР’РћР•
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
@@ -20,15 +24,13 @@ public static class Noise
         {
             scale = 0.0001f;
         }
-        float maxNoiseHeight = float.MinValue;
-        float minNoiseHeight = float.MaxValue;
 
         float halfWidth = mapWidth / 2f;
         float halfHeight = mapHeight / 2f;
 
-        for (int y = 0; y<mapHeight; y++)
+        for (int y = 0; y < mapHeight; y++)
         {
-            for (int x = 0; x<mapWidth; x++)
+            for (int x = 0; x < mapWidth; x++)
             {
                 float amplitude = 1;
                 float frequency = 1;
@@ -36,8 +38,9 @@ public static class Noise
 
                 for (int i = 0; i < octaves; i++)
                 {
-                    float sampleX = (x - halfHeight + octaveOffsets[i].x) / scale * frequency ; // x-halfHeight - для масштабирования относительно центра текстуры
-                    float sampleY = (y - halfWidth - octaveOffsets[i].y) / scale * frequency;
+                    float sampleX = (x - halfHeight + octaveOffsets[i].x) / scale * frequency;
+                    float sampleY = (y - halfWidth + octaveOffsets[i].y) / scale * frequency;
+
 
                     float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
                     noiseHeight += perlinValue * amplitude;
@@ -45,27 +48,21 @@ public static class Noise
                     amplitude *= persistance;
                     frequency *= lacunarity;
                 }
-                if (noiseHeight > maxNoiseHeight)
-                {
-                    maxNoiseHeight = noiseHeight;
-                }
-                else if (noiseHeight < minNoiseHeight)
-                {
-                    minNoiseHeight = noiseHeight;
-                }
                 noiseMap[x, y] = noiseHeight + upperHeight;
             }
         }
-        /*
-        for (int y = 0; y < mapHeight; y++)
+
+        // в¬…пёЏ РќРћР’РћР•: РіР»РѕР±Р°Р»СЊРЅС‹Р№ РґРёР°РїР°Р·РѕРЅ С€СѓРјР° вЂ” РѕРґРёРЅР°РєРѕРІС‹Р№ РґР»СЏ РІСЃРµС… С‡Р°РЅРєРѕРІ
+        float maxAmp = 0f;
+        float amp = 1f;
+        for (int i = 0; i < octaves; i++)
         {
-            for (int x = 0; x < mapWidth; x++)
-            {
-                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
-            }
+            maxAmp += amp;
+            amp *= persistance;
         }
-        */ // Нормализация (либо не раскоменчивать, либо переделать по туториалу, т.к. сейчас она создает резкие переходы между чанками
-        
+        outMin = -maxAmp + upperHeight;
+        outMax = +maxAmp + upperHeight;
+
         return noiseMap;
     }
 }

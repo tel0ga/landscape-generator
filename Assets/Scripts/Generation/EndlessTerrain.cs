@@ -1,25 +1,19 @@
-using JetBrains.Annotations;
-using MarchingBytes;
-using NUnit.Framework.Internal;
+п»їusing MarchingBytes;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class EndlessTerain : MonoBehaviour
 {
     [SerializeField]
-    public static float maxViewDst = 300;               // дальность прорисовки чанков и деревьев
-
+    public static float maxViewDst = 150;
 
     [SerializeField]
-    public static float existDst = 2000;                // расстояние, на котором они существуют
-
+    public static float existDst = 2000;
 
     public Transform viewer;
 
-    const float updateThreshold = 150f;
+    const float updateThreshold = 100f;
     const float sqrUpdateThreshold = updateThreshold * updateThreshold;
 
     const float deleteThreshold = 500f;
@@ -32,12 +26,14 @@ public class EndlessTerain : MonoBehaviour
     static MapGenerator mapGenerator;
     int chunkSize;
     int chunksVisibleInViewDst;
-    public Material mapMaterial;
 
-    public static int treeSpacing = 12;
+    // в¬…пёЏ Р”Р’Рђ РјР°С‚РµСЂРёР°Р»Р° РІРјРµСЃС‚Рѕ РѕРґРЅРѕРіРѕ
+    public Material mapMaterial;         // РґР»СЏ PixelColours
+    public Material shaderMapMaterial;   // в¬…пёЏ РќРћР’РћР•: РґР»СЏ ShaderTextures
+
+    public static int treeSpacing = 15;
 
     static Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
-
     static List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
 
     private void Start()
@@ -47,10 +43,11 @@ public class EndlessTerain : MonoBehaviour
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
         UpdateVisibleChunks();
     }
+
     private void Update()
     {
         viewerPosition = new Vector2(viewer.position.x, viewer.position.y);
-        if ((viewerPosition-viewerPositionOld).sqrMagnitude > sqrUpdateThreshold)
+        if ((viewerPosition - viewerPositionOld).sqrMagnitude > sqrUpdateThreshold)
         {
             viewerPositionOld = viewerPosition;
             UpdateVisibleChunks();
@@ -61,13 +58,13 @@ public class EndlessTerain : MonoBehaviour
             UpdateExistingChunks();
         }
     }
+
     void UpdateVisibleChunks()
     {
         Dictionary<Vector2, TerrainChunk> chunksForDelete = new Dictionary<Vector2, TerrainChunk>();
         for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++)
         {
             chunksForDelete.Add(terrainChunksVisibleLastUpdate[i].position, terrainChunksVisibleLastUpdate[i]);
-            //terrainChunksVisibleLastUpdate[i].SetVisible(false);
         }
         terrainChunksVisibleLastUpdate.Clear();
         int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
@@ -89,28 +86,28 @@ public class EndlessTerain : MonoBehaviour
                 }
                 else
                 {
-                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, transform, mapMaterial));
+                    // в¬…пёЏ Р’С‹Р±РёСЂР°РµРј РјР°С‚РµСЂРёР°Р» РїРѕ СЂРµР¶РёРјСѓ
+                    Material mat = (mapGenerator.renderMode == MapGenerator.RenderMode.PixelColours)
+                        ? mapMaterial
+                        : shaderMapMaterial;
+
+                    terrainChunkDictionary.Add(
+                        viewedChunkCoord,
+                        new TerrainChunk(viewedChunkCoord, chunkSize, transform, mat)
+                    );
                 }
             }
         }
         foreach (Vector2 v in chunksForDelete.Keys.ToArray())
         {
             chunksForDelete[v].UpdateTerrainChunk();
-            //chunksForDelete[v].SetVisible(false);
         }
         chunksForDelete.Clear();
     }
 
     void UpdateExistingChunks()
     {
-        //for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++)
-        //{
-        //    terrainChunksExistedLastUpdate[i].SetVisible(false);
-        //}
-        int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
-        int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / chunkSize);
-
-        foreach (Vector2 chunkPosition in terrainChunkDictionary.Keys.ToList())     // ToList создает копию списка, поэтому после удаления старых чанков ничего не сломается
+        foreach (Vector2 chunkPosition in terrainChunkDictionary.Keys.ToList())
         {
             TerrainChunk chunk = terrainChunkDictionary[chunkPosition];
             if (!chunk.Exists())
@@ -141,7 +138,9 @@ public class EndlessTerain : MonoBehaviour
             meshObject = new GameObject("Terrain Chunk");
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
             meshFilter = meshObject.AddComponent<MeshFilter>();
-            meshRenderer.material = material;
+
+            // в¬…пёЏ sharedMaterial РІРјРµСЃС‚Рѕ material вЂ” СЂР°Р±РѕС‚Р°РµС‚ СЃ MaterialPropertyBlock
+            meshRenderer.sharedMaterial = material;
 
             meshObject.transform.position = positionV3;
             meshObject.transform.parent = parent;
@@ -153,11 +152,48 @@ public class EndlessTerain : MonoBehaviour
         void OnMapDataRecieved(MapData mapData)
         {
             mapGenerator.RequestMeshData(mapData, OnMeshDataRecieved);
-            Texture2D texture = TextureGenerator.TextureFromColourMap(mapData.colourMap, MapGenerator.mapChunkSize, MapGenerator.mapChunkSize);
-            meshRenderer.material.mainTexture = texture;
-            // Генерация деревьев (хардкод, мб исправить)
-            
-            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 50, position, treeSpacing);
+
+            // в¬…пёЏ Р РђР—Р’РР›РљРђ РїРѕ СЂРµР¶РёРјСѓ
+            if (mapGenerator.renderMode == MapGenerator.RenderMode.PixelColours)
+            {
+                // ===== РЎРўРђР РђРЇ РЎРРЎРўР•РњРђ =====
+                Texture2D texture = TextureGenerator.TextureFromColourMap(
+                    mapData.colourMap,
+                    MapGenerator.mapChunkSize,
+                    MapGenerator.mapChunkSize
+                );
+
+                MaterialPropertyBlock props = new MaterialPropertyBlock();
+                meshRenderer.GetPropertyBlock(props);
+                props.SetTexture("_BaseMap", texture); // URP Lit
+                // Р•СЃР»Рё Built-in вЂ” "_MainTex"
+                meshRenderer.SetPropertyBlock(props);
+            }
+            else
+            {
+                // ===== РќРћР’РђРЇ РЎРРЎРўР•РњРђ =====
+                Texture2D noiseTex = TextureGenerator.TextureFromNoiseMap(
+                    mapData.heightMap,
+                    mapData.minNoise,
+                    mapData.maxNoise
+                );
+
+                MaterialPropertyBlock props = new MaterialPropertyBlock();
+                meshRenderer.GetPropertyBlock(props);
+                props.SetTexture("_NoiseMap", noiseTex);
+                props.SetFloat("_NoiseMin", mapData.minNoise);
+                props.SetFloat("_NoiseMax", mapData.maxNoise);
+
+                float halfSize = (MapGenerator.mapChunkSize - 1) / 2f;
+                Vector4 chunkOrigin = new Vector4(position.x - halfSize, position.y - halfSize, 0, 0);
+                props.SetVector("_ChunkOrigin", chunkOrigin);
+                props.SetFloat("_ChunkSize", MapGenerator.mapChunkSize - 1);
+
+                meshRenderer.SetPropertyBlock(props);
+            }
+
+            // Р”РµСЂРµРІСЊСЏ
+            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 20, position, treeSpacing);
             natureGameObjects = new GameObject[natureObjects.Length];
 
             hasMapData = true;
@@ -174,33 +210,31 @@ public class EndlessTerain : MonoBehaviour
             float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
             bool visible = viewerDstFromNearestEdge <= maxViewDst;
 
-            if (natureGameObjects.Length!=0)            //(natureGameObjects!=null)
+            if (natureGameObjects.Length != 0)
             {
                 if (visible && natureGameObjects[0] == null)
                 {
-                    for (int i = 0; i < natureObjects.Length; i++)  // достаем деревья из пула
+                    for (int i = 0; i < natureObjects.Length; i++)
                     {
-                        natureGameObjects[i] = EasyObjectPool.instance.GetObjectFromPool(natureObjects[i].objectName, natureObjects[i].position, Quaternion.identity);
-                        //obj.transform.parent = meshObject.transform;      // если сделать родительским объектом чанк, пул перестанет реагировать на дерево
+                        natureGameObjects[i] = EasyObjectPool.instance.GetObjectFromPool(
+                            natureObjects[i].objectName,
+                            natureObjects[i].position,
+                            Quaternion.identity
+                        );
                     }
                 }
                 else if (!visible && natureGameObjects[0] != null)
                 {
-                    if (natureGameObjects != null)                          // если есть деревья
+                    for (int i = 0; i < natureGameObjects.Length; i++)
                     {
-                        for (int i = 0; i < natureGameObjects.Length; i++)  // возвращаем все объекты в пул, если чанк не в поле зрения (данные о них остаются, пока существует чанк)
-                        {                                                   // стоит сохранять мапдаты в долгосрочную память, чтобы удалять чанки и создавать точно такие же
-                            if (natureGameObjects[i] != null)
-                            {
-                                EasyObjectPool.instance.ReturnObjectToPool(natureGameObjects[i]);
-                                natureGameObjects[i] = null;
-                            }
+                        if (natureGameObjects[i] != null)
+                        {
+                            EasyObjectPool.instance.ReturnObjectToPool(natureGameObjects[i]);
+                            natureGameObjects[i] = null;
                         }
                     }
-
                 }
             }
-            
 
             if (visible)
             {
@@ -211,20 +245,23 @@ public class EndlessTerain : MonoBehaviour
             }
             SetVisible(visible);
         }
+
         public bool Exists()
         {
             float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
-            bool exists = viewerDstFromNearestEdge <= existDst;
-            return exists;
+            return viewerDstFromNearestEdge <= existDst;
         }
+
         public void Delete()
         {
             Destroy(meshObject);
         }
+
         public void SetVisible(bool visible)
         {
             meshObject.SetActive(visible);
         }
+
         public bool IsVisible()
         {
             return meshObject.activeSelf;

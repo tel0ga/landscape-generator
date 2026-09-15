@@ -1,31 +1,33 @@
-using System.Collections.Generic;
+п»їusing System.Collections.Generic;
 using System.Threading;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.EventSystems.EventTrigger;
 
 public class MapGenerator : MonoBehaviour
 {
-    public enum DrawMode {NoiseMap, ColourMap, Mesh};
+    public enum DrawMode { NoiseMap, ColourMap, Mesh };
     public DrawMode drawMode;
 
-    public const int mapChunkSize = 241; 
-    //[Range(0, 12)]
-    int levelOfDetail = (mapChunkSize-1)/2;
-    public float noiseScale;    // размер карты шума
+    // в¬…пёЏ РќРћР’РћР•: РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ СЂРµРЅРґРµСЂР°
+    public enum RenderMode { PixelColours, ShaderTextures }
+    [Header("Render Mode")]
+    public RenderMode renderMode = RenderMode.PixelColours;
 
-    public int octaves;         // количество слоев шума
-    [Range(0, 1)]               // слайдер в редакторе
-    public float persistance;   // насколько с увеличением октавы умножается частота шума (уменьшается масштаб, увеличивается детализация)
-    public float lacunarity;    // насколько с увеличением октавы уменьшается влияние слоя на конечную текстуру
+    public const int mapChunkSize = 121;
+    int levelOfDetail = (mapChunkSize - 1) / 2;
+    public float noiseScale;
+
+    public int octaves;
+    [Range(0, 1)]
+    public float persistance;
+    public float lacunarity;
 
     public int seed;
     public Vector2 offset;
     public float upperHeight = 0f;
 
-    public bool autoUpdate;     // обновление при изменении параметров в редакторе
+    public bool autoUpdate;
 
-    public TerrainType[] regions; // вода, суша, горы и тд.
+    public TerrainType[] regions;
 
     Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
     Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
@@ -55,8 +57,8 @@ public class MapGenerator : MonoBehaviour
             MapDataThread(centre, callback);
         };
         new Thread(threadStart).Start();
-
     }
+
     void MapDataThread(Vector2 centre, System.Action<MapData> callback)
     {
         MapData mapData = GenerateMapData(centre);
@@ -81,7 +83,8 @@ public class MapGenerator : MonoBehaviour
         lock (meshDataThreadInfoQueue)
         {
             meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
-        };
+        }
+        ;
     }
 
     private void Update()
@@ -106,7 +109,12 @@ public class MapGenerator : MonoBehaviour
 
     MapData GenerateMapData(Vector2 centre)
     {
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, centre+offset, upperHeight);
+        // в¬…пёЏ РќРћР’РћР•: РїРѕР»СѓС‡Р°РµРј min/max С‡РµСЂРµР· out-РїР°СЂР°РјРµС‚СЂС‹
+        float[,] noiseMap = Noise.GenerateNoiseMap(
+            mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity,
+            centre + offset, upperHeight,
+            out float minNoise, out float maxNoise
+        );
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
 
@@ -119,31 +127,22 @@ public class MapGenerator : MonoBehaviour
                 {
                     if (currentHeight <= regions[i].height)
                     {
-                        colourMap[y * mapChunkSize + x] = regions[i].colour; // умножаем на ширину карты, чтобы из двумерного индекса получить одномерный
+                        colourMap[y * mapChunkSize + x] = regions[i].colour;
                         break;
                     }
                 }
             }
         }
 
-        return new MapData(noiseMap, colourMap);
+        return new MapData(noiseMap, colourMap, minNoise, maxNoise);  // в¬…пёЏ РґРѕР±Р°РІРёР»Рё min/max
     }
-    
-    private void OnValidate() // срабатывает каждый раз, когда переменные меняются в редакторе
+
+    private void OnValidate()
     {
-        if (lacunarity < 1)
-        {
-            lacunarity = 1;
-        }
-        if (octaves < 0)
-        {
-            octaves = 0;
-        }
+        if (lacunarity < 1) lacunarity = 1;
+        if (octaves < 0) octaves = 0;
     }
-    //private void Start()
-    //{
-    //    GenerateMapData();
-    //}
+
     struct MapThreadInfo<T>
     {
         public readonly System.Action<T> callback;
@@ -154,8 +153,6 @@ public class MapGenerator : MonoBehaviour
             this.parameter = parameter;
         }
     }
-
-    
 }
 
 [System.Serializable]
@@ -164,16 +161,20 @@ public struct TerrainType
     public string name;
     public float height;
     public Color colour;
-
 }
 
 public struct MapData
 {
     public float[,] heightMap;
     public Color[] colourMap;
-    public MapData(float[,] heightMap, Color[] colourMap)
+    public float minNoise;   // в¬…пёЏ РќРћР’РћР•
+    public float maxNoise;   // в¬…пёЏ РќРћР’РћР•
+
+    public MapData(float[,] heightMap, Color[] colourMap, float minNoise, float maxNoise)
     {
         this.heightMap = heightMap;
         this.colourMap = colourMap;
+        this.minNoise = minNoise;
+        this.maxNoise = maxNoise;
     }
 }
