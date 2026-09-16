@@ -27,6 +27,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _CausticsTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DarkGrassTex:
         m_Texture: {fileID: 2800000, guid: 61407c8f210bb5541a519233ea2b7381, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -71,8 +75,12 @@ Material:
         m_Texture: {fileID: 2800000, guid: 414dd72ca475a3048905ab57fda5420d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _WaterTex:
+    - _WaterLocalTex:
         m_Texture: {fileID: 2800000, guid: 6edee982b8c3cf84f8ce72aa557476f0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaterTex:
+        m_Texture: {fileID: 2800000, guid: e2ed398621a18ed4792aa5bef41bcb2e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _WetSandTex:
@@ -82,23 +90,51 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlendWidth: 0.003
+    - _CausticsDepthFade: 0.65
+    - _CausticsIntensity: 0.07
+    - _CausticsScale: 0.03
+    - _CausticsSharpness: 4.4
+    - _CausticsSpeed: 2.3
     - _ChunkSize: 240
     - _DarkGrassThreshold: 0.86
     - _EnableExternalAlpha: 0
+    - _FoamAnimAmount: 0.007
+    - _FoamAnimSpeed: 127.13
+    - _FoamWidth: 0.006
+    - _FresnelBias: 0.3
+    - _FresnelMin: 0.15
+    - _FresnelStrength: 2
+    - _GlintChance: 0.022
+    - _GlintSpeed: 5.28
     - _GrassThreshold: 0.77
+    - _NoiseLacunarity: 2
     - _NoiseMax: 3.335
     - _NoiseMin: -2.335
+    - _NoiseOctaves: 3
+    - _NoisePersistence: 0.5
+    - _NoiseScale: 0.5
+    - _NoiseStrength: 5
+    - _PPU: 3
     - _Rock1Threshold: 0.98
     - _Rock2Threshold: 1.32
     - _RockThreshold: 0.9
     - _SandThreshold: 0.25
+    - _ShimmerAmount: 0.246
     - _TexScale: 0.04
+    - _WaterLocalScale: 0.02
     - _WaterThreshold: 0.19
+    - _WaveAmplitude: 1
+    - _WaveFrequency: 1.5
+    - _WaveSpeed: 1
     - _WetSandThreshold: 0.2
     - _ZWrite: 0
     m_Colors:
+    - _CausticsColor: {r: 0.8509804, g: 0.97600293, b: 1, a: 1}
     - _ChunkOrigin: {r: -0.5, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _FoamColor: {r: 0.7941403, g: 0.81210995, b: 0.9169811, a: 1}
+    - _GlintColor: {r: 0.8, g: 0.95, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShimmerColor: {r: 0.9, g: 0.96999997, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

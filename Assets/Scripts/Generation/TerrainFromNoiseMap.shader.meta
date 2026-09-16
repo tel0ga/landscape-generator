@@ -6,8 +6,12 @@ ShaderImporter:
   - _NoiseMap: {instanceID: 0}
   - _WaterTex: {fileID: 2800000, guid: d87221e70b7b9444abae6f5143c53917, type: 3}
   - _WetSandTex: {fileID: 2800000, guid: c2dc65d4ee26a7f48b90e1213ae65c97, type: 3}
-  - _SandTex: {fileID: 2800000, guid: 92515a08967e3e54fbedb5ab9ebcf54d, type: 3}
-  - _GrassTex: {fileID: 2800000, guid: d96b312ff1b6a1344ad8e868a1095153, type: 3}
+  - _SandTex: {fileID: 2800000, guid: 0e2b8eb0aed50d54991b605b5692de8e, type: 3}
+  - _GrassTex: {fileID: 2800000, guid: ca2499954fae1514d8d871ec962cc9d4, type: 3}
+  - _DarkGrassTex: {fileID: 2800000, guid: 61407c8f210bb5541a519233ea2b7381, type: 3}
+  - _Rock1Tex: {fileID: 2800000, guid: d7a0bf579515252468ed28034b5d5889, type: 3}
+  - _Rock2Tex: {fileID: 2800000, guid: f9360af04ec626c4999c4d9d5cd0c54b, type: 3}
+  - _SnowTex: {fileID: 2800000, guid: 414dd72ca475a3048905ab57fda5420d, type: 3}
   nonModifiableTextures: []
   userData: 
   assetBundleName: 
