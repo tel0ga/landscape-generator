@@ -26,6 +26,13 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
         _TexScale ("Texture Scale (Land Only)", Float) = 0.1
         _PPU ("Pixels Per Unit", Float) = 3.0
 
+        // --- ВАРИАЦИЯ ТЕКСТУР ---
+        _VariationScale ("Variation Scale", Float) = 0.5
+        _VariationStrength ("Variation Strength (UV shift)", Range(0, 0.5)) = 0.15
+        _VariationBrightness ("Variation Brightness", Range(0, 1)) = 0.25
+        _VariationHue ("Variation Hue (color shift)", Range(0, 1)) = 0.1
+        _VariationUVBoost ("Variation UV Boost", Float) = 10.0
+
         // --- НАСТРОЙКИ ВОЛН ---
         _WaveSpeed ("Wave Speed", Float) = 1.5
         _WaveFrequency ("Wave Frequency", Float) = 2.5
@@ -112,6 +119,12 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
             float _TexScale;
             float _PPU;
+
+            float _VariationScale;
+            float _VariationStrength;
+            float _VariationBrightness;
+            float _VariationHue;
+            float _VariationUVBoost;
 
             float _WaveSpeed;
             float _WaveFrequency;
@@ -210,6 +223,18 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 return total / max(maxValue, 0.0001);
             }
 
+            // --- Вариация текстур: UV-сдвиг + яркость + оттенок ---
+            void GetVariation(float2 worldPos, out float2 uvOffset, out float brightness, out float hueShift)
+            {
+                // Два слоя шума — медленный для UV, быстрый для яркости/оттенка
+                float n1 = fbm2D(worldPos * _VariationScale, 2, 0.5, 2.0);
+                float n2 = fbm2D(worldPos * _VariationScale * 3.7 + 17.3, 2, 0.5, 2.0);
+
+                uvOffset   = float2(n1, n2) * _VariationStrength;
+                brightness = 1.0 + n1 * _VariationBrightness;
+                hueShift   = n2 * _VariationHue;
+            }
+
             // --- Каустика: две пересекающиеся fBm-выборки ---
             float caustics(float2 uv, float time, float scale, float sharpness)
             {
@@ -252,8 +277,21 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 float wRock2     = t5 * (1 - t6);
                 float wSnow      = t6;
 
-                // 3. UV обычных текстур суши
+                // 3. UV обычных текстур суши + вариация
                 float2 texUV = snappedWorldPos * _TexScale;
+
+                float2 varUV;
+                float varBright;
+                float varHue;
+                GetVariation(snappedWorldPos, varUV, varBright, varHue);
+
+                float2 variedUV = texUV + varUV * _TexScale * _VariationUVBoost;
+
+                float3 colorShift = float3(
+                    1.0 + varHue * 0.1,
+                    1.0,
+                    1.0 - varHue * 0.1
+                );
 
                 // 4. ЭКРАННЫЕ UV ДЛЯ ОТРАЖЕНИЯ НЕБА
                 float2 screenUV = i.screenPos.xy / i.screenPos.w;
@@ -270,15 +308,12 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
                     float2 worldXY = snappedWorldPos;
 
-                    // Слой 1: медленный поток
                     float2 flowUV = worldXY * _NoiseScale * 0.5 + float2(t * 0.05, t * 0.03);
                     float noiseSlow = fbm2D(flowUV, (int)_NoiseOctaves, _NoisePersistence, _NoiseLacunarity);
 
-                    // Слой 2: быстрая мелкая рябь
                     float2 rippleUV = worldXY * _NoiseScale * 3.0 + float2(-t * 0.15, t * 0.12);
                     float noiseFast = fbm2D(rippleUV, 2, 0.5, 2.0);
 
-                    // Синусоида как базовое "дыхание" воды
                     float2 sineOffset = float2(
                         sin(worldXY.y * _WaveFrequency + t * _WaveSpeed),
                         cos(worldXY.x * _WaveFrequency + t * _WaveSpeed)
@@ -286,7 +321,6 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
                     float2 noiseOffset = float2(noiseSlow, noiseFast) * _NoiseStrength;
 
-                    // Округление до целых пикселей экрана
                     float2 pixelOffset = floor(sineOffset + noiseOffset);
                     pixelScreenUV += pixelOffset / targetResolution;
 
@@ -294,32 +328,42 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 }
 
                 // 5. Сэмплирование всех текстур
-                // ---- Локальная вода (тайлится по миру) ----
+                // ---- Локальная вода ----
                 float2 localWaterUV = snappedWorldPos * _WaterLocalScale;
                 float waterFps = 8.0;
                 float wTime = floor(_Time.y * waterFps) / waterFps;
                 localWaterUV += float2(wTime * 0.02, wTime * 0.015);
                 float4 localWater = tex2D(_WaterLocalTex, localWaterUV);
 
-                // ---- Отражение неба (экранное) ----
+                // ---- Отражение неба ----
                 float4 skyReflection = tex2D(_WaterTex, pixelScreenUV);
 
-                // ---- Маска Френеля (по экранной Y: дальше = сильнее отражение) ----
+                // ---- Френель ----
                 float fresnel = saturate((screenUV.y - _FresnelBias) * _FresnelStrength);
                 fresnel = lerp(_FresnelMin, 1.0, fresnel);
 
-                // ---- Смешиваем ----
                 float4 water = lerp(localWater, skyReflection, fresnel);
 
-                float4 wetSand   = tex2D(_WetSandTex,   texUV);
-                float4 sand      = tex2D(_SandTex,      texUV);
-                float4 grass     = tex2D(_GrassTex,     texUV);
-                float4 darkGrass = tex2D(_DarkGrassTex, texUV);
-                float4 rock1     = tex2D(_Rock1Tex,     texUV);
-                float4 rock2     = tex2D(_Rock2Tex,     texUV);
-                float4 snow      = tex2D(_SnowTex,      texUV);
+                // ---- Текстуры суши с вариацией ----
+                float4 wetSand   = tex2D(_WetSandTex,   variedUV);
+                float4 sand      = tex2D(_SandTex,      variedUV);
+                float4 grass     = tex2D(_GrassTex,     variedUV);
+                float4 darkGrass = tex2D(_DarkGrassTex, variedUV);
+                float4 rock1     = tex2D(_Rock1Tex,     variedUV);
+                float4 rock2     = tex2D(_Rock2Tex,     variedUV);
+                float4 snow      = tex2D(_SnowTex,      variedUV);
 
-                // ---- Рябь: вариация яркости воды ----
+                // ---- Применяем яркость и оттенок ----
+                float3 varMul = varBright * colorShift;
+                wetSand.rgb   *= varMul;
+                sand.rgb      *= varMul;
+                grass.rgb     *= varMul;
+                darkGrass.rgb *= varMul;
+                rock1.rgb     *= varMul;
+                rock2.rgb     *= varMul;
+                snow.rgb      *= varMul;
+
+                // ---- Рябь ----
                 if (isDeepWater)
                 {
                     float shimmer = shimmerMask * _ShimmerAmount;
@@ -336,16 +380,14 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
                     float c = caustics(snappedWorldPos, cTime, _CausticsScale, _CausticsSharpness);
 
-                    // Затухание у берега
                     float depthFade = saturate(wWater * _CausticsDepthFade);
                     float causticsAmount = c * _CausticsIntensity * depthFade * causticsMask;
 
-                    // Аддитивно
                     water.rgb   += _CausticsColor.rgb * causticsAmount;
                     wetSand.rgb += _CausticsColor.rgb * causticsAmount * 0.4;
                 }
 
-                // 6. ПЕНА У БЕРЕГА
+                // 6. ПЕНА
                 if (wWater > 0.0)
                 {
                     float foamTime = floor(_Time.y * _FoamAnimSpeed) / _FoamAnimSpeed;
@@ -360,7 +402,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                     }
                 }
 
-                // 8. Финальное смешивание слоёв
+                // 8. Финальное смешивание
                 float4 result =
                       water     * wWater
                     + wetSand   * wWetSand

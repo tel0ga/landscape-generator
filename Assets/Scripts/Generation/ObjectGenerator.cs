@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System.Threading;
 using UnityEditor;
 using NUnit.Framework;
@@ -18,22 +18,26 @@ public static class ObjectsGenerator
     }
 
 
-    static int numberOfTrees = 7;                                      // количество префабов объектов
+    static int numberOfTrees = 7;                                      // РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµС„Р°Р±РѕРІ РѕР±СЉРµРєС‚РѕРІ
     static int numberOfStones = 6;
 
-    static string[] treeNames = GenerateNames("tree", numberOfTrees);       // разделительный пробел добавляется внутри функции
-    static string[] stoneNames = GenerateNames("stone", numberOfStones);       // разделительный пробел добавляется внутри функции
-    public static NatureObject[] GenerateObjects(float[,] heightMap, int density, Vector2 offset, int spacing)
+    static string[] treeNames = GenerateNames("tree", numberOfTrees);       // СЂР°Р·РґРµР»РёС‚РµР»СЊРЅС‹Р№ РїСЂРѕР±РµР» РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РІРЅСѓС‚СЂРё С„СѓРЅРєС†РёРё
+    static string[] stoneNames = GenerateNames("stone", numberOfStones);       // СЂР°Р·РґРµР»РёС‚РµР»СЊРЅС‹Р№ РїСЂРѕР±РµР» РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РІРЅСѓС‚СЂРё С„СѓРЅРєС†РёРё
+
+    public static NatureObject[] GenerateObjects(
+    float[,] heightMap, int density, Vector2 offset, int spacing, float pixelsPerUnit)
     {
         int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
-        int simplifiedWidth = ((width - 1) / spacing);
-        int simplifiedHeight = ((height - 1) / spacing);
-        //float bottomLeftX = (width - 1) / 2f;
-        //float bottomLeftY = (height - 1) / 2f;
-        float topLeftX = (width - 1) / -2f;
-        float topLeftY = (height - 1) / 2f;
-        int amount = Random.Range(density-5, density+5);
+        int simplifiedWidth = (width - 1) / spacing;
+        int simplifiedHeight = (height - 1) / spacing;
+
+        float worldWidth = (width - 1) / pixelsPerUnit;
+        float worldHeight = (height - 1) / pixelsPerUnit;
+        float topLeftX = worldWidth / -2f;
+        float topLeftY = worldHeight / 2f;
+
+        int amount = Random.Range(density - 5, density + 5);
         List<NatureObject> objects = new List<NatureObject>();
         List<Vector2> filled = new List<Vector2>();
 
@@ -41,23 +45,25 @@ public static class ObjectsGenerator
         {
             int x = Random.Range(0, simplifiedWidth) * spacing;
             int y = Random.Range(0, simplifiedHeight) * spacing;
-            Vector2 pos = offset + new Vector2(topLeftX + x, topLeftY - y);
+
+            // в¬…пёЏ РґРµР»РёРј РЅР° pixelsPerUnit, С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РјРёСЂРѕРІС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹
+            Vector2 pos = offset + new Vector2(
+                topLeftX + x / pixelsPerUnit,
+                topLeftY - y / pixelsPerUnit
+            );
+
             float pointHeight = heightMap[x, y];
-            if (pointHeight > 0.25f && !filled.Contains(pos))     //0.25f - высота, начиная с которой растут деревья
+            if (pointHeight > 0.25f && !filled.Contains(pos))
             {
-                float randChoice = Random.Range(0f, 1f);        // случайная дробь от 0 до 1
+                float randChoice = Random.Range(0f, 1f);
                 string objectName;
-                if (randChoice > 0.85f)                          // Если попадется число больше 0.85 (меньший шанс) - выбираем камень из списка камней
-                {
+                if (randChoice > 0.85f)
                     objectName = stoneNames[Random.Range(0, stoneNames.Length - 1)];
-                }
-                else                                            // иначе - дерево
-                {
+                else
                     objectName = treeNames[Random.Range(0, treeNames.Length - 1)];
-                }
+
                 objects.Add(new NatureObject(objectName, pos));
                 filled.Add(pos);
-                //objects.Add(new NatureObject(natureObjectNames[Random.Range(0, natureObjectNames.Length - 1)], new Vector2(x, y) + offset - new Vector2(bottomLeftX, bottomLeftY)));
             }
         }
         return objects.ToArray();

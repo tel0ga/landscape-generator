@@ -2,30 +2,29 @@
 
 public static class MeshGenerator
 {
-    public static MeshData GenerateTerrainMesh(float[,] heightMap, int levelOfDetail)
+    public static MeshData GenerateTerrainMesh(float[,] heightMap, int levelOfDetail, float pixelsPerUnit)
     {
         int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
 
-        float topLeftX = (width - 1) / -2f;
-        float topLeftY = (height - 1) / 2f;
+        float worldWidth = (width - 1) / pixelsPerUnit;
+        float worldHeight = (height - 1) / pixelsPerUnit;
 
-        // Всегда 4 вершины и 2 треугольника
+        float topLeftX = worldWidth / -2f;
+        float topLeftY = worldHeight / 2f;
+
         MeshData meshData = new MeshData(2, 2);
 
-        // Вершины: TL, TR, BL, BR
-        meshData.vertices[0] = new Vector3(topLeftX, topLeftY, 0); // top-left
-        meshData.vertices[1] = new Vector3(topLeftX + width - 1, topLeftY, 0); // top-right
-        meshData.vertices[2] = new Vector3(topLeftX, topLeftY - (height - 1), 0); // bottom-left
-        meshData.vertices[3] = new Vector3(topLeftX + width - 1, topLeftY - (height - 1), 0); // bottom-right
+        meshData.vertices[0] = new Vector3(topLeftX, topLeftY, 0);
+        meshData.vertices[1] = new Vector3(topLeftX + worldWidth, topLeftY, 0);
+        meshData.vertices[2] = new Vector3(topLeftX, topLeftY - worldHeight, 0);
+        meshData.vertices[3] = new Vector3(topLeftX + worldWidth, topLeftY - worldHeight, 0);
 
-        // UV
         meshData.uvs[0] = new Vector2(0, 1);
         meshData.uvs[1] = new Vector2(1, 1);
         meshData.uvs[2] = new Vector2(0, 0);
         meshData.uvs[3] = new Vector2(1, 0);
 
-        // Треугольники (по часовой стрелке, если смотреть на -Z)
         meshData.AddTriangle(0, 1, 2);
         meshData.AddTriangle(1, 3, 2);
 

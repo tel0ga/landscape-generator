@@ -6,14 +6,14 @@ using UnityEngine;
 public class EndlessTerain : MonoBehaviour
 {
     [SerializeField]
-    public static float maxViewDst = 400;
+    public static float maxViewDst = 45;
 
     [SerializeField]
-    public static float existDst = 2000;
+    public static float existDst = 1000;
 
     public Transform viewer;
 
-    const float updateThreshold = 100f;
+    const float updateThreshold = 10f;
     const float sqrUpdateThreshold = updateThreshold * updateThreshold;
 
     const float deleteThreshold = 500f;
@@ -36,10 +36,19 @@ public class EndlessTerain : MonoBehaviour
     static Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
     static List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
 
+    /*
     private void Start()
     {
         mapGenerator = FindAnyObjectByType<MapGenerator>();
         chunkSize = MapGenerator.mapChunkSize - 1;
+        chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
+        UpdateVisibleChunks();
+    }
+    */
+    void Start()
+    {
+        mapGenerator = FindAnyObjectByType<MapGenerator>();
+        chunkSize = Mathf.RoundToInt(MapGenerator.worldChunkSize); // 120 юнитов
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
         UpdateVisibleChunks();
     }
@@ -184,16 +193,24 @@ public class EndlessTerain : MonoBehaviour
                 props.SetFloat("_NoiseMin", mapData.minNoise);
                 props.SetFloat("_NoiseMax", mapData.maxNoise);
 
-                float halfSize = (MapGenerator.mapChunkSize - 1) / 2f;
+
+                float halfSize = MapGenerator.worldChunkSize / 2f;
+                Vector4 chunkOrigin = new Vector4(
+                    position.x - halfSize,
+                    position.y - halfSize, 0, 0);
+                props.SetVector("_ChunkOrigin", chunkOrigin);
+                props.SetFloat("_ChunkSize", MapGenerator.worldChunkSize);
+
+                /*float halfSize = (MapGenerator.mapChunkSize - 1) / 2f;
                 Vector4 chunkOrigin = new Vector4(position.x - halfSize, position.y - halfSize, 0, 0);
                 props.SetVector("_ChunkOrigin", chunkOrigin);
-                props.SetFloat("_ChunkSize", MapGenerator.mapChunkSize - 1);
+                props.SetFloat("_ChunkSize", MapGenerator.mapChunkSize - 1); */
 
                 meshRenderer.SetPropertyBlock(props);
             }
 
             // Деревья
-            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 10, position, treeSpacing);
+            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 2, position, treeSpacing, MapGenerator.PixelsPerUnit);
             natureGameObjects = new GameObject[natureObjects.Length];
 
             hasMapData = true;

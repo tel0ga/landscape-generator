@@ -4,22 +4,20 @@ using System.Collections;
 public static class Noise
 {
     public static float[,] GenerateNoiseMap(
-        int mapWidth, int mapHeight, int seed, float scale,
-        int octaves, float persistance, float lacunarity,
-        Vector2 offset, float upperHeight,
-        out float outMin, out float outMax,
-        // ⬅️ НОВЫЕ ПАРАМЕТРЫ domain warping
-        float warpStrength = 30f,
-        float warpScale = 1500f,
-        int warpOctaves = 3,
-        float warpPersistance = 0.5f,
-        float warpLacunarity = 2f)
+    int mapWidth, int mapHeight, int seed, float scale,
+    int octaves, float persistance, float lacunarity,
+    Vector2 offset, float upperHeight,
+    out float outMin, out float outMax,
+    float pixelsPerUnit = 1f,
+    float warpStrength = 30f,
+    float warpScale = 1500f,
+    int warpOctaves = 3,
+    float warpPersistance = 0.5f,
+    float warpLacunarity = 2f)
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
         System.Random prng = new System.Random(seed);
-
-        // Смещения для основного шума
         Vector2[] octaveOffsets = new Vector2[octaves];
         for (int i = 0; i < octaves; i++)
         {
@@ -28,7 +26,6 @@ public static class Noise
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
         }
 
-        // ⬅️ НОВОЕ: смещения для warp-шума (отдельный PRNG, чтобы не зависеть от octaves)
         System.Random warpPrng = new System.Random(seed + 1337);
         Vector2[] warpOctaveOffsets = new Vector2[warpOctaves];
         for (int i = 0; i < warpOctaves; i++)
@@ -41,14 +38,18 @@ public static class Noise
         if (scale <= 0) scale = 0.0001f;
         if (warpScale <= 0) warpScale = 0.0001f;
 
-        float halfWidth = mapWidth / 2f;
-        float halfHeight = mapHeight / 2f;
+        // ⬅️ ПОЛУРАЗМЕРЫ В МИРОВЫХ ЮНИТАХ, а не в индексах
+        float worldHalfWidth = (mapWidth - 1) / pixelsPerUnit / 2f;
+        float worldHalfHeight = (mapHeight - 1) / pixelsPerUnit / 2f;
 
         for (int y = 0; y < mapHeight; y++)
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                // ⬅️ НОВОЕ: вычисляем warp-смещение для текущей точки
+                // ⬅️ МИРОВЫЕ координаты точки относительно центра чанка
+                float worldX = x / pixelsPerUnit - worldHalfWidth;
+                float worldY = y / pixelsPerUnit - worldHalfHeight;
+
                 float warpX = 0f;
                 float warpY = 0f;
                 if (warpStrength > 0f)
@@ -58,10 +59,10 @@ public static class Noise
 
                     for (int i = 0; i < warpOctaves; i++)
                     {
-                        float wx = (x - halfHeight + warpOctaveOffsets[i].x) / warpScale * warpFreq;
-                        float wy = (y - halfWidth + warpOctaveOffsets[i].y) / warpScale * warpFreq;
+                        // ⬅️ используем worldX/worldY (заодно исправлен баг: x/y были перепутаны)
+                        float wx = (worldX + warpOctaveOffsets[i].x) / warpScale * warpFreq;
+                        float wy = (worldY + warpOctaveOffsets[i].y) / warpScale * warpFreq;
 
-                        // Два независимых канала шума для X и Y
                         float noiseX = Mathf.PerlinNoise(wx, wy) * 2f - 1f;
                         float noiseY = Mathf.PerlinNoise(wx + 5.2f, wy + 1.3f) * 2f - 1f;
 
@@ -76,15 +77,15 @@ public static class Noise
                     warpY *= warpStrength;
                 }
 
-                // Основной шум (с применённым warp-смещением)
                 float amplitude = 1;
                 float frequency = 1;
                 float noiseHeight = 0;
 
                 for (int i = 0; i < octaves; i++)
                 {
-                    float sampleX = (x - halfHeight + octaveOffsets[i].x + warpX) / scale * frequency;
-                    float sampleY = (y - halfWidth + octaveOffsets[i].y + warpY) / scale * frequency;
+                    // ⬅️ worldX/worldY вместо (x - halfWidth)
+                    float sampleX = (worldX + octaveOffsets[i].x + warpX) / scale * frequency;
+                    float sampleY = (worldY + octaveOffsets[i].y + warpY) / scale * frequency;
 
                     float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
                     noiseHeight += perlinValue * amplitude;
@@ -96,7 +97,6 @@ public static class Noise
             }
         }
 
-        // Глобальный диапазон шума — одинаковый для всех чанков
         float maxAmp = 0f;
         float amp = 1f;
         for (int i = 0; i < octaves; i++)

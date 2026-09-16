@@ -14,6 +14,10 @@ public class MapGenerator : MonoBehaviour
 
     public const int mapChunkSize = 121;
     int levelOfDetail = (mapChunkSize - 1) / 2;
+
+    public const float worldChunkSize = 15f; // размер чанка в юнитах
+    public static float PixelsPerUnit => (mapChunkSize - 1) / worldChunkSize;
+
     public float noiseScale;
 
     public int octaves;
@@ -48,7 +52,7 @@ public class MapGenerator : MonoBehaviour
         }
         else if (drawMode == DrawMode.Mesh)
         {
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, levelOfDetail), TextureGenerator.TextureFromColourMap(mapData.colourMap, mapChunkSize, mapChunkSize));
+            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapData.heightMap, levelOfDetail, MapGenerator.PixelsPerUnit), TextureGenerator.TextureFromColourMap(mapData.colourMap, mapChunkSize, mapChunkSize));
         }
     }
 
@@ -81,7 +85,7 @@ public class MapGenerator : MonoBehaviour
 
     void MeshDataThread(MapData mapData, System.Action<MeshData> callback)
     {
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightMap, levelOfDetail);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.heightMap, levelOfDetail, MapGenerator.PixelsPerUnit);
         lock (meshDataThreadInfoQueue)
         {
             meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
@@ -109,13 +113,14 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    MapData GenerateMapData(Vector2 centre)
+    public MapData GenerateMapData(Vector2 centre)
     {
         // ⬅️ НОВОЕ: получаем min/max через out-параметры
         float[,] noiseMap = Noise.GenerateNoiseMap(
             mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity,
             centre + offset, upperHeight,
-            out float minNoise, out float maxNoise
+            out float minNoise, out float maxNoise,
+            MapGenerator.PixelsPerUnit        // ⬅️ НОВОЕ
         );
         /*float[,] riverMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed + 999,                        // РЕКИИИ
             noiseScale * 1, 4, persistance, lacunarity, centre + offset,0f,out _, out _);
@@ -143,6 +148,51 @@ public class MapGenerator : MonoBehaviour
                     if (currentHeight <= regions[i].height)
                     {
                         colourMap[y * mapChunkSize + x] = regions[i].colour;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return new MapData(noiseMap, colourMap, minNoise, maxNoise);  // ⬅️ добавили min/max
+    }
+
+
+    public MapData GenerateMapData(Vector2 centre, int scale = 1)
+    {
+        // ⬅️ НОВОЕ: получаем min/max через out-параметры
+        float[,] noiseMap = Noise.GenerateNoiseMap(
+            mapChunkSize * scale, mapChunkSize * scale, seed, noiseScale, octaves, persistance, lacunarity,
+            centre + offset, upperHeight,
+            out float minNoise, out float maxNoise,
+            MapGenerator.PixelsPerUnit        // ⬅️ НОВОЕ
+        );
+        /*float[,] riverMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed + 999,                        // РЕКИИИ
+            noiseScale * 1, 4, persistance, lacunarity, centre + offset,0f,out _, out _);
+
+        for (int y = 0; y < mapChunkSize; y++)
+        {
+            for (int x = 0; x < mapChunkSize; x++)
+            {
+                float riverNoise = Mathf.Abs(riverMap[x, y] - 0.5f) * 2f;
+                riverNoise = 1f - riverNoise;
+                riverNoise = Mathf.Pow(riverNoise, 8f);
+                noiseMap[x, y] -= riverNoise * riverDepth;
+            }
+        }
+        */
+        Color[] colourMap = new Color[mapChunkSize * mapChunkSize * scale * scale];
+
+        for (int y = 0; y < mapChunkSize * scale; y++)
+        {
+            for (int x = 0; x < mapChunkSize * scale; x++)
+            {
+                float currentHeight = noiseMap[x, y];
+                for (int i = 0; i < regions.Length; i++)
+                {
+                    if (currentHeight <= regions[i].height)
+                    {
+                        colourMap[y * mapChunkSize * scale + x] = regions[i].colour;
                         break;
                     }
                 }

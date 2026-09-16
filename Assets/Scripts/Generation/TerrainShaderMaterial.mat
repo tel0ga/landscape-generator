@@ -89,48 +89,48 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BlendWidth: 0.003
-    - _CausticsDepthFade: 0.65
-    - _CausticsIntensity: 0.07
-    - _CausticsScale: 0.03
-    - _CausticsSharpness: 4.4
-    - _CausticsSpeed: 2.3
-    - _ChunkSize: 240
+    - _BlendWidth: 0.005
+    - _CausticsDepthFade: 0.39
+    - _CausticsIntensity: 0.12
+    - _CausticsScale: 0.51
+    - _CausticsSharpness: 3.55
+    - _CausticsSpeed: 11.8
+    - _ChunkSize: 15
     - _DarkGrassThreshold: 0.86
     - _EnableExternalAlpha: 0
-    - _FoamAnimAmount: 0.007
-    - _FoamAnimSpeed: 127.13
-    - _FoamWidth: 0.006
-    - _FresnelBias: 0.3
-    - _FresnelMin: 0.15
-    - _FresnelStrength: 2
-    - _GlintChance: 0.022
+    - _FoamAnimAmount: 0.002
+    - _FoamAnimSpeed: 16
+    - _FoamWidth: 0.004
+    - _FresnelBias: 0.23
+    - _FresnelMin: 0
+    - _FresnelStrength: 0.4
+    - _GlintChance: 0
     - _GlintSpeed: 5.28
     - _GrassThreshold: 0.77
     - _NoiseLacunarity: 2
-    - _NoiseMax: 3.335
-    - _NoiseMin: -2.335
+    - _NoiseMax: 2.4921875
+    - _NoiseMin: -1.4921875
     - _NoiseOctaves: 3
     - _NoisePersistence: 0.5
-    - _NoiseScale: 0.5
+    - _NoiseScale: 1
     - _NoiseStrength: 5
-    - _PPU: 3
+    - _PPU: 16
     - _Rock1Threshold: 0.98
     - _Rock2Threshold: 1.32
     - _RockThreshold: 0.9
     - _SandThreshold: 0.25
-    - _ShimmerAmount: 0.246
-    - _TexScale: 0.04
-    - _WaterLocalScale: 0.02
+    - _ShimmerAmount: 0.3
+    - _TexScale: 0.5
+    - _WaterLocalScale: 0.5
     - _WaterThreshold: 0.19
-    - _WaveAmplitude: 1
-    - _WaveFrequency: 1.5
-    - _WaveSpeed: 1
+    - _WaveAmplitude: 1.25
+    - _WaveFrequency: 5
+    - _WaveSpeed: 3
     - _WetSandThreshold: 0.2
     - _ZWrite: 0
     m_Colors:
     - _CausticsColor: {r: 0.8509804, g: 0.97600293, b: 1, a: 1}
-    - _ChunkOrigin: {r: -0.5, g: 0, b: 0, a: 0}
+    - _ChunkOrigin: {r: -7.5, g: -7.5, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _FoamColor: {r: 0.7941403, g: 0.81210995, b: 0.9169811, a: 1}
     - _GlintColor: {r: 0.8, g: 0.95, b: 1, a: 1}
