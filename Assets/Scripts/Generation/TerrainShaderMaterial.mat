@@ -68,7 +68,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SandTex:
-        m_Texture: {fileID: 2800000, guid: 92515a08967e3e54fbedb5ab9ebcf54d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0e2b8eb0aed50d54991b605b5692de8e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SnowMap:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SnowTex:
@@ -90,51 +94,74 @@ Material:
     m_Ints: []
     m_Floats:
     - _BlendWidth: 0.005
-    - _CausticsDepthFade: 0.39
-    - _CausticsIntensity: 0.12
-    - _CausticsScale: 0.51
-    - _CausticsSharpness: 3.55
-    - _CausticsSpeed: 11.8
-    - _ChunkSize: 15
+    - _CausticsDepthFade: 0.61
+    - _CausticsIntensity: 0.07
+    - _CausticsScale: 0.28
+    - _CausticsSharpness: 4
+    - _CausticsSpeed: 8
+    - _ChunkSize: 60
     - _DarkGrassThreshold: 0.86
     - _EnableExternalAlpha: 0
     - _FoamAnimAmount: 0.002
-    - _FoamAnimSpeed: 16
-    - _FoamWidth: 0.004
-    - _FresnelBias: 0.23
+    - _FoamAnimSpeed: 24
+    - _FoamWidth: 0.0015
+    - _FresnelBias: 0.34
     - _FresnelMin: 0
-    - _FresnelStrength: 0.4
+    - _FresnelStrength: 0.6
     - _GlintChance: 0
     - _GlintSpeed: 5.28
     - _GrassThreshold: 0.77
+    - _LightDirX: 35.91
+    - _LightDirY: -0.7
+    - _LightDirZ: 40.81
     - _NoiseLacunarity: 2
-    - _NoiseMax: 2.4921875
-    - _NoiseMin: -1.4921875
+    - _NoiseMax: 2.4960938
+    - _NoiseMin: -1.4960938
     - _NoiseOctaves: 3
-    - _NoisePersistence: 0.5
-    - _NoiseScale: 1
-    - _NoiseStrength: 5
+    - _NoisePersistence: 0.57
+    - _NoiseScale: 0.89
+    - _NoiseStrength: 46.6
     - _PPU: 16
     - _Rock1Threshold: 0.98
     - _Rock2Threshold: 1.32
     - _RockThreshold: 0.9
     - _SandThreshold: 0.25
-    - _ShimmerAmount: 0.3
+    - _ShimmerAmount: 0.23
+    - _SnowAmbient: 0.26
+    - _SnowCoverageBlend: 0
+    - _SnowCoverageThreshold: 0.66
+    - _SnowInValleys: 1
+    - _SnowNormalStrength: 10.08
+    - _SnowPadding: 0.03816794
+    - _SnowShadowLength: 0.06
+    - _SnowShadowLevels: 2
+    - _SnowShadowSharpness: 0.07
+    - _SnowShadowStrength: 0
+    - _SnowShadowThreshold: 0.212
+    - _SnowTexelSize: 0.001908397
     - _TexScale: 0.5
+    - _VariationBrightness: 0.19
+    - _VariationHue: 0.61
+    - _VariationScale: 0.56
+    - _VariationStrength: 0.036
+    - _VariationUVBoost: 10.39
     - _WaterLocalScale: 0.5
     - _WaterThreshold: 0.19
-    - _WaveAmplitude: 1.25
-    - _WaveFrequency: 5
-    - _WaveSpeed: 3
+    - _WaveAmplitude: 2.1
+    - _WaveFrequency: 4.02
+    - _WaveSpeed: 8
     - _WetSandThreshold: 0.2
     - _ZWrite: 0
     m_Colors:
     - _CausticsColor: {r: 0.8509804, g: 0.97600293, b: 1, a: 1}
-    - _ChunkOrigin: {r: -7.5, g: -7.5, b: 0, a: 0}
+    - _ChunkOrigin: {r: -30, g: -30, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _FoamColor: {r: 0.7941403, g: 0.81210995, b: 0.9169811, a: 1}
+    - _FoamColor: {r: 0.46217862, g: 0.4725702, b: 0.5245282, a: 1}
     - _GlintColor: {r: 0.8, g: 0.95, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShimmerColor: {r: 0.9, g: 0.96999997, b: 1, a: 1}
+    - _SnowHighlightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SnowShadowColor: {r: 0.71715915, g: 0.84168833, b: 0.9622642, a: 1}
+    - _SnowTint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

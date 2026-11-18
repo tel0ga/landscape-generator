@@ -1,0 +1,1031 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72b6740502f24c068e2848f92e5668b7, type: 3}
+  m_Name: DefaultCatalog
+  m_EditorClassIdentifier:
+  items:
+  - {fileID: 11400001}
+  - {fileID: 11400002}
+  - {fileID: 11400003}
+  - {fileID: 11400004}
+  - {fileID: 11400005}
+  - {fileID: 11400006}
+  - {fileID: 11400007}
+  - {fileID: 11400008}
+  - {fileID: 11400009}
+  - {fileID: 11400010}
+  - {fileID: 11400011}
+  - {fileID: 11400012}
+  - {fileID: 11400013}
+  - {fileID: 11400014}
+  - {fileID: 11400015}
+  - {fileID: 11400016}
+  - {fileID: 11400017}
+--- !u!114 &11400001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: ammo.light
+  m_EditorClassIdentifier:
+  id: "ammo.light"
+  displayName: "Лёгкие патроны"
+  description: ""
+  kind: 1
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 99
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 1
+    g: 1
+    b: 0
+    a: 1
+--- !u!114 &11400002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: ammo.shell
+  m_EditorClassIdentifier:
+  id: "ammo.shell"
+  displayName: "Картечь"
+  description: ""
+  kind: 1
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 99
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 1
+    g: 0.5
+    b: 0.2
+    a: 1
+--- !u!114 &11400003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: ammo.arrow
+  m_EditorClassIdentifier:
+  id: "ammo.arrow"
+  displayName: "Стрелы"
+  description: ""
+  kind: 1
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 99
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0
+    g: 1
+    b: 0
+    a: 1
+--- !u!114 &11400004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: resource.scrap
+  m_EditorClassIdentifier:
+  id: "resource.scrap"
+  displayName: "Металлолом"
+  description: ""
+  kind: 2
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 99
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.5
+    g: 0.5
+    b: 0.5
+    a: 1
+--- !u!114 &11400005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: throw.grenade
+  m_EditorClassIdentifier:
+  id: "throw.grenade"
+  displayName: "Граната"
+  description: ""
+  kind: 3
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 10
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 65
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0
+    g: 1
+    b: 0
+    a: 1
+--- !u!114 &11400006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: throw.molotov
+  m_EditorClassIdentifier:
+  id: "throw.molotov"
+  displayName: "Зажигательная бутылка"
+  description: ""
+  kind: 3
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 10
+  throwable:
+    incendiary: 1
+    range: 7
+    travelTime: 0.65
+    fuse: 0.65
+    damage: 35
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 1
+    g: 0.3
+    b: 0.1
+    a: 1
+--- !u!114 &11400007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: attachment.sight
+  m_EditorClassIdentifier:
+  id: "attachment.sight"
+  displayName: "Коллиматор"
+  description: ""
+  kind: 4
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: "sight"
+  compatibleFamilies:
+  - "gun"
+  - "bow"
+  modifiers:
+  - stat: 1
+    flat: 0
+    percent: -0.35
+  tint:
+    r: 0
+    g: 1
+    b: 1
+    a: 1
+--- !u!114 &11400008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: attachment.magazine
+  m_EditorClassIdentifier:
+  id: "attachment.magazine"
+  displayName: "Большой магазин"
+  description: ""
+  kind: 4
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: "magazine"
+  compatibleFamilies:
+  - "gun"
+  modifiers:
+  - stat: 4
+    flat: 8
+    percent: 0
+  - stat: 2
+    flat: 0
+    percent: 0.15
+  tint:
+    r: 0
+    g: 1
+    b: 1
+    a: 1
+--- !u!114 &11400009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef65805dbd984aed9a7710bc68258a96, type: 3}
+  m_Name: attachment.muzzle
+  m_EditorClassIdentifier:
+  id: "attachment.muzzle"
+  displayName: "Компенсатор"
+  description: ""
+  kind: 4
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: "muzzle"
+  compatibleFamilies:
+  - "gun"
+  modifiers:
+  - stat: 1
+    flat: 0
+    percent: -0.2
+  tint:
+    r: 0
+    g: 1
+    b: 1
+    a: 1
+--- !u!114 &11400010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.pistol
+  m_EditorClassIdentifier:
+  attackKind: 0
+  family: "gun"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 20
+  damageType: 0
+  range: 18
+  attacksPerMinute: 240
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.light"
+    magazineSize: 12
+    automatic: 0
+    pellets: 1
+    spread: 3
+    reloadTime: 1.4
+    reloadOneAtATime: 0
+  melee:
+    angle: 90
+    windup: 0.15
+    activeTime: 0.12
+    recovery: 0.3
+    staminaCost: 12
+  projectile:
+    prefab: {fileID: 0}
+    speed: 22
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 0
+    duration: 3
+    interval: 1
+    damage: 3
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots:
+  - "sight"
+  - "magazine"
+  - "muzzle"
+  id: "weapon.pistol"
+  displayName: "Пистолет"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.75
+    g: 0.8
+    b: 0.9
+    a: 1
+--- !u!114 &11400011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.rifle
+  m_EditorClassIdentifier:
+  attackKind: 0
+  family: "gun"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 12
+  damageType: 0
+  range: 22
+  attacksPerMinute: 600
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.light"
+    magazineSize: 30
+    automatic: 1
+    pellets: 1
+    spread: 7
+    reloadTime: 2
+    reloadOneAtATime: 0
+  melee:
+    angle: 90
+    windup: 0.15
+    activeTime: 0.12
+    recovery: 0.3
+    staminaCost: 12
+  projectile:
+    prefab: {fileID: 0}
+    speed: 22
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 0
+    duration: 3
+    interval: 1
+    damage: 3
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots:
+  - "sight"
+  - "magazine"
+  - "muzzle"
+  id: "weapon.rifle"
+  displayName: "Автомат"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.6
+    g: 0.7
+    b: 0.4
+    a: 1
+--- !u!114 &11400012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.shotgun
+  m_EditorClassIdentifier:
+  attackKind: 0
+  family: "gun"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 8
+  damageType: 0
+  range: 10
+  attacksPerMinute: 75
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.shell"
+    magazineSize: 6
+    automatic: 0
+    pellets: 7
+    spread: 22
+    reloadTime: 0.65
+    reloadOneAtATime: 1
+  melee:
+    angle: 90
+    windup: 0.15
+    activeTime: 0.12
+    recovery: 0.3
+    staminaCost: 12
+  projectile:
+    prefab: {fileID: 0}
+    speed: 22
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 0
+    duration: 3
+    interval: 1
+    damage: 3
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots:
+  - "sight"
+  - "magazine"
+  - "muzzle"
+  id: "weapon.shotgun"
+  displayName: "Дробовик"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.7
+    g: 0.4
+    b: 0.2
+    a: 1
+--- !u!114 &11400013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.knife
+  m_EditorClassIdentifier:
+  attackKind: 1
+  family: "melee"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 24
+  damageType: 0
+  range: 1.5
+  attacksPerMinute: 150
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.light"
+    magazineSize: 12
+    automatic: 0
+    pellets: 1
+    spread: 3
+    reloadTime: 1.4
+    reloadOneAtATime: 0
+  melee:
+    angle: 90
+    windup: 0.15
+    activeTime: 0.12
+    recovery: 0.3
+    staminaCost: 8
+  projectile:
+    prefab: {fileID: 0}
+    speed: 22
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 2
+    duration: 3
+    interval: 1
+    damage: 2
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots: []
+  id: "weapon.knife"
+  displayName: "Нож"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 1
+    g: 1
+    b: 1
+    a: 1
+--- !u!114 &11400014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.axe
+  m_EditorClassIdentifier:
+  attackKind: 1
+  family: "melee"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 45
+  damageType: 0
+  range: 2.1
+  attacksPerMinute: 60
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.light"
+    magazineSize: 12
+    automatic: 0
+    pellets: 1
+    spread: 3
+    reloadTime: 1.4
+    reloadOneAtATime: 0
+  melee:
+    angle: 130
+    windup: 0.3
+    activeTime: 0.12
+    recovery: 0.5
+    staminaCost: 22
+  projectile:
+    prefab: {fileID: 0}
+    speed: 22
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 0
+    duration: 3
+    interval: 1
+    damage: 3
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots: []
+  id: "weapon.axe"
+  displayName: "Топор"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.9
+    g: 0.5
+    b: 0.3
+    a: 1
+--- !u!114 &11400015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.spear
+  m_EditorClassIdentifier:
+  attackKind: 1
+  family: "melee"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 30
+  damageType: 0
+  range: 3
+  attacksPerMinute: 90
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.light"
+    magazineSize: 12
+    automatic: 0
+    pellets: 1
+    spread: 3
+    reloadTime: 1.4
+    reloadOneAtATime: 0
+  melee:
+    angle: 25
+    windup: 0.15
+    activeTime: 0.12
+    recovery: 0.3
+    staminaCost: 14
+  projectile:
+    prefab: {fileID: 0}
+    speed: 22
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 0
+    duration: 3
+    interval: 1
+    damage: 3
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots: []
+  id: "weapon.spear"
+  displayName: "Копьё"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.5
+    g: 0.5
+    b: 0.5
+    a: 1
+--- !u!114 &11400016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.bow
+  m_EditorClassIdentifier:
+  attackKind: 2
+  family: "bow"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 32
+  damageType: 0
+  range: 20
+  attacksPerMinute: 100
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.arrow"
+    magazineSize: 1
+    automatic: 0
+    pellets: 1
+    spread: 3
+    reloadTime: 0.5
+    reloadOneAtATime: 0
+  melee:
+    angle: 90
+    windup: 0.15
+    activeTime: 0.12
+    recovery: 0.3
+    staminaCost: 12
+  projectile:
+    prefab: {fileID: 0}
+    speed: 22
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 0
+    duration: 3
+    interval: 1
+    damage: 3
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots:
+  - "sight"
+  id: "weapon.bow"
+  displayName: "Лук"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.7
+    g: 0.5
+    b: 0.25
+    a: 1
+--- !u!114 &11400017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2af5612231f45628cd5d46d71f7f8cb, type: 3}
+  m_Name: weapon.crossbow
+  m_EditorClassIdentifier:
+  attackKind: 2
+  family: "bow"
+  heldPrefab: {fileID: 0}
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  impactSound: {fileID: 0}
+  muzzleEffect: {fileID: 0}
+  impactEffect: {fileID: 0}
+  damage: 55
+  damageType: 0
+  range: 25
+  attacksPerMinute: 60
+  criticalChance: 0.1
+  criticalMultiplier: 1.5
+  knockback: 2
+  fire:
+    ammoId: "ammo.arrow"
+    magazineSize: 1
+    automatic: 0
+    pellets: 1
+    spread: 3
+    reloadTime: 1.5
+    reloadOneAtATime: 0
+  melee:
+    angle: 90
+    windup: 0.15
+    activeTime: 0.12
+    recovery: 0.3
+    staminaCost: 12
+  projectile:
+    prefab: {fileID: 0}
+    speed: 35
+    lifetime: 4
+    radius: 0.08
+  effect:
+    kind: 0
+    duration: 3
+    interval: 1
+    damage: 3
+    slow: 0.3
+  maxDurability: 100
+  durabilityCost: 1
+  repairResourceId: "resource.scrap"
+  repairCostPerPoint: 0.2
+  attachmentSlots:
+  - "sight"
+  id: "weapon.crossbow"
+  displayName: "Арбалет"
+  description: ""
+  kind: 0
+  icon: {fileID: 0}
+  worldPrefab: {fileID: 0}
+  stackLimit: 1
+  throwable:
+    incendiary: 0
+    range: 7
+    travelTime: 0.65
+    fuse: 1.5
+    damage: 55
+    radius: 3
+    fireDuration: 5
+    fireInterval: 0.7
+  attachmentSlot: ""
+  compatibleFamilies: []
+  modifiers: []
+  tint:
+    r: 0.45
+    g: 0.3
+    b: 0.2
+    a: 1

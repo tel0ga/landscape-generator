@@ -1,0 +1,329 @@
+{
+  "controlSchemes": [],
+  "maps": [
+    {
+      "id": "0fffc538-ef8f-46ac-bb49-a63621ffcd93",
+      "actions": [
+        {
+          "id": "245c31cd-5562-42e9-9069-57cbb34695f4",
+          "interactions": "",
+          "initialStateCheck": true,
+          "type": "PassThrough",
+          "processors": "",
+          "name": "AimPosition",
+          "expectedControlType": "Vector2"
+        },
+        {
+          "id": "a5fa10c7-01a6-48ea-8bed-8ab3a5d7d31d",
+          "interactions": "",
+          "initialStateCheck": true,
+          "type": "Value",
+          "processors": "",
+          "name": "AimStick",
+          "expectedControlType": "Vector2"
+        },
+        {
+          "id": "057b065c-cabc-46c1-8a96-d913c585d22b",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Attack",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "6e7a7dea-9a75-4768-8b0b-85fc4f8f6f15",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Reload",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "9215f589-c0dc-48a7-a6db-d35f636c3da7",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Slot1",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "df6b7341-a815-4d62-a347-22caa344cc7b",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Slot2",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "ab19d9f2-1c54-4dd2-a782-49dbd2f17853",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Next",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "035d7652-5d87-4245-81a6-d61511a17075",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Previous",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "07427e82-5004-4fae-bd07-3280f65c2b45",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Throw",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "e60c6849-4b1a-4590-b6bb-052feaacb35c",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Interact",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "bf2bff70-2238-4791-9ffa-d1742791d399",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Inventory",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "eb127f43-6b60-429e-b064-f93ce3df2e65",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Save",
+          "expectedControlType": "Button"
+        },
+        {
+          "id": "aa6327f5-0084-406d-a18f-0ff5c3f9475c",
+          "interactions": "",
+          "initialStateCheck": false,
+          "type": "Button",
+          "processors": "",
+          "name": "Load",
+          "expectedControlType": "Button"
+        }
+      ],
+      "bindings": [
+        {
+          "action": "AimPosition",
+          "name": "",
+          "processors": "",
+          "path": "<Pointer>/position",
+          "groups": "",
+          "isComposite": false,
+          "id": "3b192eac-044b-4534-b460-f0478a17a8c6",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "AimStick",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/rightStick",
+          "groups": "",
+          "isComposite": false,
+          "id": "3bdb9f47-1d13-4c18-af41-57d6f1edab1f",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Attack",
+          "name": "",
+          "processors": "",
+          "path": "<Mouse>/leftButton",
+          "groups": "",
+          "isComposite": false,
+          "id": "2c320b8c-0057-4d6e-8fc1-02563b0ce7f8",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Attack",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/rightTrigger",
+          "groups": "",
+          "isComposite": false,
+          "id": "392d4d3f-ceed-4307-9a7c-921e80046dd4",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Reload",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/r",
+          "groups": "",
+          "isComposite": false,
+          "id": "3515235f-1f43-4655-844d-151569c7d3d1",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Reload",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/buttonWest",
+          "groups": "",
+          "isComposite": false,
+          "id": "16a6993f-2ee5-41cd-a69e-953ae4135a78",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Slot1",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/1",
+          "groups": "",
+          "isComposite": false,
+          "id": "dd0abb66-54fe-46dc-a1e0-ab3794e7e7f6",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Slot2",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/2",
+          "groups": "",
+          "isComposite": false,
+          "id": "74094bbe-f884-4895-90e9-3d0d29cfb4bd",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Next",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/rightShoulder",
+          "groups": "",
+          "isComposite": false,
+          "id": "53246513-c8e4-4d82-8dc1-455e55b6a6ac",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Previous",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/leftShoulder",
+          "groups": "",
+          "isComposite": false,
+          "id": "9c119de9-d253-4e94-9f26-bf5e34b2e5c1",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Throw",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/g",
+          "groups": "",
+          "isComposite": false,
+          "id": "72e2bcb3-ad0c-441a-9e1b-8632b901a6da",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Throw",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/leftTrigger",
+          "groups": "",
+          "isComposite": false,
+          "id": "cdb1db8a-ad73-401a-b8cb-02117b5f4940",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Interact",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/e",
+          "groups": "",
+          "isComposite": false,
+          "id": "db071757-7ac5-440c-8036-5c2f84a894a1",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Interact",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/buttonSouth",
+          "groups": "",
+          "isComposite": false,
+          "id": "729de400-d999-43e6-8bad-dbc8ec048478",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Inventory",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/tab",
+          "groups": "",
+          "isComposite": false,
+          "id": "8751ba68-4e4f-4fd4-b786-cbbe771d11f1",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Inventory",
+          "name": "",
+          "processors": "",
+          "path": "<Gamepad>/start",
+          "groups": "",
+          "isComposite": false,
+          "id": "fde50aa5-e47b-4f90-954b-baaf3cca8fee",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Save",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/f5",
+          "groups": "",
+          "isComposite": false,
+          "id": "d2270b9c-c448-4c35-9646-8d95555b29f2",
+          "interactions": "",
+          "isPartOfComposite": false
+        },
+        {
+          "action": "Load",
+          "name": "",
+          "processors": "",
+          "path": "<Keyboard>/f9",
+          "groups": "",
+          "isComposite": false,
+          "id": "8e48856d-ae49-4040-b1f9-5daeabc21744",
+          "interactions": "",
+          "isPartOfComposite": false
+        }
+      ],
+      "name": "Combat"
+    }
+  ],
+  "name": "CombatActions"
+}

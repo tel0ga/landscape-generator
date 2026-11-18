@@ -2,16 +2,17 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    private Transform player;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    Transform player;
+    FlyingMode flight;
+    public void SetTarget(Transform target, FlyingMode flyingMode) { player = target; flight = flyingMode; }
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
-
-    // Update is called once per frame
-    void FixedUpdate()
+    void LateUpdate()
     {
-        transform.position = Vector3.Lerp(transform.position, player.position-Vector3.forward*10, 0.2f); // -Vector3.forward для того, чтобы камера находилась перед сценой, а не внутри 
+        if (player == null) return;
+        var target = flight != null && flight.isFlying ? flight.transform : player;
+        transform.position = Vector3.Lerp(transform.position, target.position - Vector3.forward * 10, 1 - Mathf.Exp(-12 * Time.deltaTime));
     }
 }

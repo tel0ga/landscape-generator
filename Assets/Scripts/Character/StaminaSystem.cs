@@ -59,10 +59,28 @@ public class StaminaSystem : MonoBehaviour
     public float MaxStamina => maxStamina;
     public float StaminaPercent => currentStamina / maxStamina;
     public bool CanSprint => !isExhausted && currentStamina > 0f;
+    public event System.Action Changed;
+
+    void Awake() { currentStamina = Mathf.Max(1f, maxStamina); }
+
+    public bool TryConsumeStamina(float amount)
+    {
+        amount = Mathf.Max(0, amount);
+        if (currentStamina < amount) return false;
+        currentStamina -= amount; regenTimer = regenDelay; wasDrainingThisFrame = true;
+        if (blockSprintOnEmpty && currentStamina <= 0) isExhausted = true;
+        UpdateFill(); ApplyColor(); Changed?.Invoke(); return true;
+    }
+
+    public void RestoreStamina(float value)
+    {
+        currentStamina = Mathf.Clamp(value, 0, maxStamina);
+        regenTimer = 0; isExhausted = blockSprintOnEmpty && currentStamina <= 0;
+        UpdateFill(); ApplyColor(); Changed?.Invoke();
+    }
 
     void Start()
     {
-        currentStamina = maxStamina;
         UpdateFill();
         ApplyAlpha(instant: true);
         ApplyColor();
@@ -81,6 +99,7 @@ public class StaminaSystem : MonoBehaviour
             currentStamina = Mathf.Min(currentStamina, maxStamina);
             UpdateFill();
             ApplyColor();
+            Changed?.Invoke();
         }
 
         // Разблокировка бега
@@ -110,6 +129,7 @@ public class StaminaSystem : MonoBehaviour
             isExhausted = true;
 
         wasDrainingThisFrame = true;
+        Changed?.Invoke();
     }
 
     // ===== Внутренние методы =====

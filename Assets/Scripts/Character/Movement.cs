@@ -3,23 +3,23 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Скорость")]
+    [Header("РЎРєРѕСЂРѕСЃС‚СЊ")]
     [SerializeField] private float walkSpeed = 50f;
     [SerializeField] private float sprintMultiplier = 2f;
     [SerializeField] private float smoothing = 0.03f;
 
-    [Header("Поворот")]
+    [Header("РџРѕРІРѕСЂРѕС‚")]
     [SerializeField] private bool flipSprite = true;
     [SerializeField] private Transform spriteTransform;
 
-    [Header("Проверка движения (для стамины)")]
-    [Tooltip("Минимальная реальная скорость, чтобы считать, что игрок двигается")]
+    [Header("РџСЂРѕРІРµСЂРєР° РґРІРёР¶РµРЅРёСЏ (РґР»СЏ СЃС‚Р°РјРёРЅС‹)")]
+    [Tooltip("РњРёРЅРёРјР°Р»СЊРЅР°СЏ СЂРµР°Р»СЊРЅР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ, С‡С‚РѕР±С‹ СЃС‡РёС‚Р°С‚СЊ, С‡С‚Рѕ РёРіСЂРѕРє РґРІРёРіР°РµС‚СЃСЏ")]
     [SerializeField] private float movementThreshold = 0.5f;
 
-    [Tooltip("Минимальная длина ввода, чтобы считать, что игрок жмёт клавиши")]
+    [Tooltip("РњРёРЅРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅР° РІРІРѕРґР°, С‡С‚РѕР±С‹ СЃС‡РёС‚Р°С‚СЊ, С‡С‚Рѕ РёРіСЂРѕРє Р¶РјС‘С‚ РєР»Р°РІРёС€Рё")]
     [SerializeField] private float inputThreshold = 0.1f;
 
-    // ===== Ссылки =====
+    // ===== РЎСЃС‹Р»РєРё =====
     private Rigidbody2D rb;
     private StaminaSystem stamina;
 
@@ -27,6 +27,9 @@ public class PlayerMovement : MonoBehaviour
     private InputSystem_Actions controls;
     private Vector2 moveInput;
     private bool sprintHeld;
+    private Vector2 knockback, appliedKnockback;
+    public void AddKnockback(Vector2 velocity) { knockback = Vector2.ClampMagnitude(knockback + velocity, 25); }
+    public void ClearKnockback() { knockback = appliedKnockback = Vector2.zero; }
 
     void Awake()
     {
@@ -40,51 +43,61 @@ public class PlayerMovement : MonoBehaviour
 
     void OnEnable() => controls.Player.Enable();
     void OnDisable() => controls.Player.Disable();
+    void OnDestroy() => controls.Dispose();
 
     void Update()
     {
-        // Ввод
+        // Р’РІРѕРґ
         moveInput = controls.Player.Move.ReadValue<Vector2>().normalized;
         sprintHeld = controls.Player.Sprint.IsPressed();
 
-        // Поворот
-        if (flipSprite && spriteTransform != null && Mathf.Abs(moveInput.x) > 0.01f)
+        // РџРѕРІРѕСЂРѕС‚
+        var combat = GetComponent<SurvivalCombat.CombatActor>();
+        Vector2 facing = combat != null && combat.Aim != null ? combat.Aim.Direction : moveInput;
+        if (flipSprite && spriteTransform != null && Mathf.Abs(facing.x) > 0.01f)
         {
             Vector3 scale = spriteTransform.localScale;
-            scale.x = Mathf.Abs(scale.x) * (moveInput.x < 0 ? -1f : 1f);
+            scale.x = Mathf.Abs(scale.x) * (facing.x < 0 ? -1f : 1f);
             spriteTransform.localScale = scale;
         }
     }
 
     void FixedUpdate()
     {
-        // ==== 1. Проверяем, есть ли вообще ввод с клавиатуры ====
+        var combat = GetComponent<SurvivalCombat.CombatActor>();
+        if (combat != null && combat.Blocked)
+        { rb.linearVelocity = Vector2.zero; ClearKnockback(); return; }
+        // ==== 1. РџСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё РІРѕРѕР±С‰Рµ РІРІРѕРґ СЃ РєР»Р°РІРёР°С‚СѓСЂС‹ ====
         bool hasInput = moveInput.sqrMagnitude > inputThreshold * inputThreshold;
 
-        // ==== 2. Проверяем, реально ли игрок двигается (не уперся в стену) ====
-        // Смотрим на фактическую скорость Rigidbody2D
+        // ==== 2. РџСЂРѕРІРµСЂСЏРµРј, СЂРµР°Р»СЊРЅРѕ Р»Рё РёРіСЂРѕРє РґРІРёРіР°РµС‚СЃСЏ (РЅРµ СѓРїРµСЂСЃСЏ РІ СЃС‚РµРЅСѓ) ====
+        // РЎРјРѕС‚СЂРёРј РЅР° С„Р°РєС‚РёС‡РµСЃРєСѓСЋ СЃРєРѕСЂРѕСЃС‚СЊ Rigidbody2D
         float actualSpeed = rb.linearVelocity.magnitude;
         bool isActuallyMoving = actualSpeed > movementThreshold;
 
-        // ==== 3. Проверяем, разрешен ли бег (по стамине) ====
+        // ==== 3. РџСЂРѕРІРµСЂСЏРµРј, СЂР°Р·СЂРµС€РµРЅ Р»Рё Р±РµРі (РїРѕ СЃС‚Р°РјРёРЅРµ) ====
         bool sprintAllowed = stamina == null || stamina.CanSprint;
 
-        // ==== 4. Итоговое условие: бежим ли мы по-настоящему ====
+        // ==== 4. РС‚РѕРіРѕРІРѕРµ СѓСЃР»РѕРІРёРµ: Р±РµР¶РёРј Р»Рё РјС‹ РїРѕ-РЅР°СЃС‚РѕСЏС‰РµРјСѓ ====
         bool actuallySprinting = sprintHeld && hasInput && isActuallyMoving && sprintAllowed;
 
-        // ==== 5. Тратим стамину ТОЛЬКО если реально бежим ====
+        // ==== 5. РўСЂР°С‚РёРј СЃС‚Р°РјРёРЅСѓ РўРћР›Р¬РљРћ РµСЃР»Рё СЂРµР°Р»СЊРЅРѕ Р±РµР¶РёРј ====
         if (stamina != null && actuallySprinting)
         {
             stamina.DrainStamina();
         }
 
-        // ==== 6. Скорость и движение ====
+        // ==== 6. РЎРєРѕСЂРѕСЃС‚СЊ Рё РґРІРёР¶РµРЅРёРµ ====
         float currentSpeed = walkSpeed * (actuallySprinting ? sprintMultiplier : 1f);
+        var effects = GetComponent<SurvivalCombat.StatusEffectController>();
+        if (effects != null) currentSpeed *= effects.MovementMultiplier;
 
         rb.linearVelocity = Vector2.LerpUnclamped(
-            rb.linearVelocity,
+            rb.linearVelocity - appliedKnockback,
             moveInput * currentSpeed,
             smoothing
-        );
+        ) + knockback;
+        appliedKnockback = knockback;
+        knockback = Vector2.MoveTowards(knockback, Vector2.zero, 15f * Time.fixedDeltaTime);
     }
 }

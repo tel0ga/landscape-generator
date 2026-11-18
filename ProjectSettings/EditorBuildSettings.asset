@@ -11,5 +11,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MAIN SCENE.unity
     guid: f3b3ac2b15472494e83bb1ae5eb1a067
+  - enabled: 1
+    path: Assets/Scenes/CombatArena.unity
+    guid: 601d5eb850684de0b99499e6d4d4f4a1
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}

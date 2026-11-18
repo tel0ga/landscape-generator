@@ -1,7 +1,4 @@
 ﻿using UnityEngine;
-using System.Threading;
-using UnityEditor;
-using NUnit.Framework;
 using System.Collections.Generic;
 
 public static class ObjectsGenerator
@@ -25,7 +22,7 @@ public static class ObjectsGenerator
     static string[] stoneNames = GenerateNames("stone", numberOfStones);       // разделительный пробел добавляется внутри функции
 
     public static NatureObject[] GenerateObjects(
-    float[,] heightMap, int density, Vector2 offset, int spacing, float pixelsPerUnit)
+    float[,] heightMap, int density, Vector2 offset, int spacing, float pixelsPerUnit, int seed = 0)
     {
         int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
@@ -37,32 +34,35 @@ public static class ObjectsGenerator
         float topLeftX = worldWidth / -2f;
         float topLeftY = worldHeight / 2f;
 
-        int amount = Random.Range(density - 5, density + 5);
+        int chunkX = Mathf.RoundToInt(offset.x / MapGenerator.worldChunkSize);
+        int chunkY = Mathf.RoundToInt(offset.y / MapGenerator.worldChunkSize);
+        var random = new System.Random(unchecked(seed * 73856093 ^ chunkX * 19349663 ^ chunkY * 83492791));
+        int amount = Mathf.Max(0, random.Next(density - 5, density + 5));
         List<NatureObject> objects = new List<NatureObject>();
         List<Vector2> filled = new List<Vector2>();
 
         for (int i = 0; i < amount; i++)
         {
-            int x = Random.Range(0, simplifiedWidth) * spacing;
-            int y = Random.Range(0, simplifiedHeight) * spacing;
+            int x = random.Next(0, Mathf.Max(1, simplifiedWidth)) * spacing;
+            int y = random.Next(0, Mathf.Max(1, simplifiedHeight)) * spacing;
 
             // ⬅️ делим на pixelsPerUnit, чтобы получить мировые координаты
             Vector2 pos = offset + new Vector2(
                 topLeftX + x / pixelsPerUnit,
-                topLeftY - y / pixelsPerUnit
+                -topLeftY + y / pixelsPerUnit
             );
 
             float pointHeight = heightMap[x, y];
             if (pointHeight > 0.25f && !filled.Contains(pos))
             {
-                float randChoice = Random.Range(0f, 1f);
+                float randChoice = (float)random.NextDouble();
                 string objectName;
                 if (randChoice > 0.85f)
-                    objectName = stoneNames[Random.Range(0, stoneNames.Length - 1)];
+                    objectName = stoneNames[random.Next(stoneNames.Length)];
                 else
-                    objectName = treeNames[Random.Range(0, treeNames.Length - 1)];
+                    objectName = treeNames[random.Next(treeNames.Length)];
 
-                objects.Add(new NatureObject(objectName, pos));
+                objects.Add(new NatureObject(objectName, pos) { stableId = $"nature:{seed}:{chunkX}:{chunkY}:{x}:{y}" });
                 filled.Add(pos);
             }
         }
@@ -73,6 +73,7 @@ public static class ObjectsGenerator
 
 public class NatureObject
 {
+    public string stableId;
     public string objectName;
     public Vector2 position;
     public NatureObject(string objectName, Vector2 position)

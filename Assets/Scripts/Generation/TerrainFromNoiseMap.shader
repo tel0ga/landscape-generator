@@ -3,10 +3,14 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
     Properties
     {
         _NoiseMap ("Noise Map", 2D) = "white" {}
+        _SnowMap ("Snow Coverage Map", 2D) = "black" {}
         _NoiseMin ("Noise Min", Float) = -2.335
         _NoiseMax ("Noise Max", Float) = 3.335
         _ChunkOrigin ("Chunk Origin", Vector) = (0,0,0,0)
         _ChunkSize ("Chunk Size", Float) = 60
+
+        _SnowTexelSize ("Snow Texel Size", Float) = 0.0083
+        _SnowPadding ("Snow Padding", Float) = 0.124
 
         _WaterTex ("Sky Reflection (Fullscreen)", 2D) = "white" {}
         _WaterLocalTex ("Water Local (Tiled)", 2D) = "white" {}
@@ -33,6 +37,21 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
         _VariationHue ("Variation Hue (color shift)", Range(0, 1)) = 0.1
         _VariationUVBoost ("Variation UV Boost", Float) = 10.0
 
+        // --- СНЕГ ---
+        _SnowCoverageThreshold ("Snow Coverage Threshold", Range(0,1)) = 0.5
+        _SnowCoverageBlend ("Snow Coverage Blend", Range(0,1)) = 0.1
+        _SnowInValleys ("Snow In Valleys", Range(0,1)) = 0.3
+        _SnowTint ("Snow Tint", Color) = (0.95, 0.97, 1.0, 1.0)
+
+        // --- ОБЪЁМ СНЕГА (стилизованные нормали) ---
+        _SnowShadowColor ("Snow Shadow Color", Color) = (0.6, 0.68, 0.85, 1.0)
+        _SnowHighlightColor ("Snow Highlight Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _SnowNormalStrength ("Snow Normal Strength", Float) = 8.0
+        _SnowShadowLevels ("Snow Shadow Levels", Range(1, 8)) = 3
+        _LightDirX ("Light Dir X", Float) = 0.5
+        _LightDirY ("Light Dir Y", Float) = 0.5
+        _LightDirZ ("Light Dir Z", Float) = 1.0
+
         // --- НАСТРОЙКИ ВОЛН ---
         _WaveSpeed ("Wave Speed", Float) = 1.5
         _WaveFrequency ("Wave Frequency", Float) = 2.5
@@ -45,7 +64,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
         _NoisePersistence ("Noise Persistence", Range(0,1)) = 0.5
         _NoiseLacunarity ("Noise Lacunarity", Float) = 2.0
 
-        // --- РЯБЬ (ВАРИАЦИЯ ЯРКОСТИ ВОДЫ) ---
+        // --- РЯБЬ ---
         _ShimmerAmount ("Shimmer Amount", Range(0,1)) = 0.15
         _ShimmerColor ("Shimmer Color", Color) = (0.9, 0.97, 1.0, 1.0)
 
@@ -58,16 +77,11 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
         _CausticsSharpness ("Caustics Sharpness", Range(0.1, 4)) = 0.25
         _CausticsDepthFade ("Caustics Depth Fade", Float) = 1.5
 
-        // --- НАСТРОЙКИ ПЕНЫ ---
+        // --- ПЕНА ---
         _FoamColor ("Foam Color", Color) = (1, 1, 1, 1)
         _FoamWidth ("Foam Width", Range(0, 0.5)) = 0.05
         _FoamAnimSpeed ("Foam Anim Speed", Float) = 4.0
         _FoamAnimAmount ("Foam Anim Amount", Range(0, 0.2)) = 0.02
-
-        // --- НАСТРОЙКИ БЛИКОВ ---
-        _GlintColor ("Glint Color", Color) = (0.8, 0.95, 1.0, 1.0)
-        _GlintChance ("Glint Chance", Range(0, 1)) = 0.02
-        _GlintSpeed ("Glint Speed", Float) = 3.0
 
         _WaterThreshold ("Water -> Wet Sand", Float) = 0.0
         _WetSandThreshold ("Wet Sand -> Sand", Float) = 0.04
@@ -104,9 +118,13 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
             };
 
             sampler2D _NoiseMap;
+            sampler2D _SnowMap;
             float _NoiseMin, _NoiseMax;
             float4 _ChunkOrigin;
             float _ChunkSize;
+
+            float _SnowTexelSize;
+            float _SnowPadding;
 
             sampler2D _WaterTex, _WetSandTex, _SandTex, _GrassTex;
             sampler2D _DarkGrassTex, _Rock1Tex, _Rock2Tex, _SnowTex;
@@ -125,6 +143,19 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
             float _VariationBrightness;
             float _VariationHue;
             float _VariationUVBoost;
+
+            float _SnowCoverageThreshold;
+            float _SnowCoverageBlend;
+            float _SnowInValleys;
+            float4 _SnowTint;
+
+            float4 _SnowShadowColor;
+            float4 _SnowHighlightColor;
+            float _SnowNormalStrength;
+            float _SnowShadowLevels;
+            float _LightDirX;
+            float _LightDirY;
+            float _LightDirZ;
 
             float _WaveSpeed;
             float _WaveFrequency;
@@ -176,7 +207,6 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453123);
             }
 
-            // --- Градиентный шум Перлина (2D) ---
             float2 fade2(float2 t)
             {
                 return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
@@ -204,7 +234,6 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 return lerp(nx0, nx1, u.y);
             }
 
-            // --- Фрактальный шум (fBm) ---
             float fbm2D(float2 p, int octaves, float persistence, float lacunarity)
             {
                 float total = 0.0;
@@ -223,10 +252,8 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 return total / max(maxValue, 0.0001);
             }
 
-            // --- Вариация текстур: UV-сдвиг + яркость + оттенок ---
             void GetVariation(float2 worldPos, out float2 uvOffset, out float brightness, out float hueShift)
             {
-                // Два слоя шума — медленный для UV, быстрый для яркости/оттенка
                 float n1 = fbm2D(worldPos * _VariationScale, 2, 0.5, 2.0);
                 float n2 = fbm2D(worldPos * _VariationScale * 3.7 + 17.3, 2, 0.5, 2.0);
 
@@ -235,7 +262,6 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 hueShift   = n2 * _VariationHue;
             }
 
-            // --- Каустика: две пересекающиеся fBm-выборки ---
             float caustics(float2 uv, float time, float scale, float sharpness)
             {
                 float2 uv1 = uv * scale + float2(time * 0.10, time * 0.07);
@@ -275,9 +301,8 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 float wDarkGrass = t3 * (1 - t4);
                 float wRock1     = t4 * (1 - t5);
                 float wRock2     = t5 * (1 - t6);
-                float wSnow      = t6;
 
-                // 3. UV обычных текстур суши + вариация
+                // 3. UV текстур + вариация
                 float2 texUV = snappedWorldPos * _TexScale;
 
                 float2 varUV;
@@ -293,7 +318,52 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                     1.0 - varHue * 0.1
                 );
 
-                // 4. ЭКРАННЫЕ UV ДЛЯ ОТРАЖЕНИЯ НЕБА
+                // ---- СНЕГ: UV с учётом padding ----
+                float2 snowUV = noiseUV * (1.0 - _SnowPadding * 2.0) + _SnowPadding;
+
+                float snowCoverage = tex2D(_SnowMap, snowUV).r;
+
+                float heightSnowWeight = t6;
+
+                float coverageWeight = smoothstep(
+                    _SnowCoverageThreshold - _SnowCoverageBlend,
+                    _SnowCoverageThreshold + _SnowCoverageBlend,
+                    snowCoverage
+                );
+
+                float wSnow = saturate(heightSnowWeight + coverageWeight * _SnowInValleys);
+
+                // ============================================================
+                // СТИЛИЗОВАННЫЕ РЕЗКИЕ НОРМАЛИ СНЕГА
+                // ============================================================
+                // Сэмплим 4 соседних пикселя карты снега
+                float hL = tex2D(_SnowMap, snowUV - float2(_SnowTexelSize, 0)).r;
+                float hR = tex2D(_SnowMap, snowUV + float2(_SnowTexelSize, 0)).r;
+                float hD = tex2D(_SnowMap, snowUV - float2(0, _SnowTexelSize)).r;
+                float hU = tex2D(_SnowMap, snowUV + float2(0, _SnowTexelSize)).r;
+
+                // Градиент — куда «смотрит» склон
+                float2 grad = float2(hR - hL, hU - hD) * _SnowNormalStrength;
+
+                // Направление света (нормализованный вектор)
+                float3 lightDir = normalize(float3(_LightDirX, _LightDirY, _LightDirZ));
+
+                // dot(normal, lightDir) — упрощённо, без нормализации нормали
+                // normal = normalize(float3(-grad.x, -grad.y, 1.0))
+                // dot = (-grad.x * lightDir.x - grad.y * lightDir.y + lightDir.z) / length(normal)
+                float normalLen = sqrt(grad.x * grad.x + grad.y * grad.y + 1.0);
+                float lighting = (-grad.x * lightDir.x - grad.y * lightDir.y + lightDir.z) / normalLen;
+
+                // Квантуем освещение — получаем стилизованные «полосы» тени/света
+                float levels = max(_SnowShadowLevels, 1.0);
+                lighting = floor(lighting * levels + 0.5) / levels;
+                lighting = saturate(lighting);
+
+                // Цвет: смешиваем тень и свет
+                float3 snowLitColor = lerp(_SnowShadowColor.rgb, _SnowHighlightColor.rgb, lighting);
+                // ============================================================
+
+                // 4. ЭКРАННЫЕ UV
                 float2 screenUV = i.screenPos.xy / i.screenPos.w;
                 float2 targetResolution = float2(640.0, 360.0);
                 float2 pixelScreenUV = floor(screenUV * targetResolution) / targetResolution;
@@ -327,24 +397,20 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                     shimmerMask = noiseSlow * 0.6 + noiseFast * 0.4;
                 }
 
-                // 5. Сэмплирование всех текстур
-                // ---- Локальная вода ----
+                // 5. Сэмплирование текстур
                 float2 localWaterUV = snappedWorldPos * _WaterLocalScale;
                 float waterFps = 8.0;
                 float wTime = floor(_Time.y * waterFps) / waterFps;
                 localWaterUV += float2(wTime * 0.02, wTime * 0.015);
                 float4 localWater = tex2D(_WaterLocalTex, localWaterUV);
 
-                // ---- Отражение неба ----
                 float4 skyReflection = tex2D(_WaterTex, pixelScreenUV);
 
-                // ---- Френель ----
                 float fresnel = saturate((screenUV.y - _FresnelBias) * _FresnelStrength);
                 fresnel = lerp(_FresnelMin, 1.0, fresnel);
 
                 float4 water = lerp(localWater, skyReflection, fresnel);
 
-                // ---- Текстуры суши с вариацией ----
                 float4 wetSand   = tex2D(_WetSandTex,   variedUV);
                 float4 sand      = tex2D(_SandTex,      variedUV);
                 float4 grass     = tex2D(_GrassTex,     variedUV);
@@ -353,7 +419,6 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 float4 rock2     = tex2D(_Rock2Tex,     variedUV);
                 float4 snow      = tex2D(_SnowTex,      variedUV);
 
-                // ---- Применяем яркость и оттенок ----
                 float3 varMul = varBright * colorShift;
                 wetSand.rgb   *= varMul;
                 sand.rgb      *= varMul;
@@ -361,7 +426,17 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                 darkGrass.rgb *= varMul;
                 rock1.rgb     *= varMul;
                 rock2.rgb     *= varMul;
-                snow.rgb      *= varMul;
+                snow.rgb      *= varMul * _SnowTint.rgb;
+
+                // Применяем стилизованное освещение к снегу
+                snow.rgb *= snowLitColor;
+
+                // Затеняем траву/камни под снегом
+                float3 underSnow = 1.0 - wSnow * 0.25;
+                grass.rgb     *= underSnow;
+                darkGrass.rgb *= underSnow;
+                rock1.rgb     *= underSnow;
+                rock2.rgb     *= underSnow;
 
                 // ---- Рябь ----
                 if (isDeepWater)
@@ -387,7 +462,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                     wetSand.rgb += _CausticsColor.rgb * causticsAmount * 0.4;
                 }
 
-                // 6. ПЕНА
+                // ---- ПЕНА ----
                 if (wWater > 0.0)
                 {
                     float foamTime = floor(_Time.y * _FoamAnimSpeed) / _FoamAnimSpeed;
@@ -402,7 +477,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                     }
                 }
 
-                // 8. Финальное смешивание
+                // 8. Финальное смешивание (без снега)
                 float4 result =
                       water     * wWater
                     + wetSand   * wWetSand
@@ -410,8 +485,10 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                     + grass     * wGrass
                     + darkGrass * wDarkGrass
                     + rock1     * wRock1
-                    + rock2     * wRock2
-                    + snow      * wSnow;
+                    + rock2     * wRock2;
+
+                // Снег поверх
+                result.rgb = lerp(result.rgb, snow.rgb, wSnow);
 
                 return result;
             }

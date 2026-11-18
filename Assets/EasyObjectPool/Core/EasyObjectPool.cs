@@ -24,8 +24,10 @@ namespace MarchingBytes {
 		private GameObject poolObjectPrefab;
 		private int poolSize;
 		private string poolName;
+		private Transform parent;
 
-		public Pool(string poolName, GameObject poolObjectPrefab, int initialCount, bool fixedSize) {
+		public Pool(string poolName, GameObject poolObjectPrefab, int initialCount, bool fixedSize, Transform parent) {
+			this.parent = parent;
 			this.poolName = poolName;
 			this.poolObjectPrefab = poolObjectPrefab;
 			this.poolSize = initialCount;
@@ -45,7 +47,7 @@ namespace MarchingBytes {
 		}
 		
 		private PoolObject NewObjectInstance() {
-			GameObject go = (GameObject)GameObject.Instantiate(poolObjectPrefab);
+			GameObject go = GameObject.Instantiate(poolObjectPrefab, parent);
 			PoolObject po = go.GetComponent<PoolObject>();
 			if(po == null) {
 				po = go.AddComponent<PoolObject>();
@@ -56,7 +58,7 @@ namespace MarchingBytes {
 		}
 
 		//o(1)
-		public GameObject NextAvailableObject(Vector3 position, Quaternion rotation) {
+		public GameObject NextAvailableObject(Vector3 position, Quaternion rotation, bool activate = true) {
 			PoolObject po = null;
 			if(availableObjStack.Count > 0) {
 				po = availableObjStack.Pop();
@@ -74,10 +76,10 @@ namespace MarchingBytes {
 			if(po != null) {
 				po.isPooled = false;
 				result = po.gameObject;
-				result.SetActive(true);
 				
 				result.transform.position = position;
 				result.transform.rotation = rotation;
+				result.SetActive(activate);
 			}
 			
 			return result;
@@ -114,15 +116,37 @@ namespace MarchingBytes {
 
 		//mapping of pool name vs list
 		private Dictionary<string, Pool> poolDictionary  = new Dictionary<string, Pool>();
+		private bool initialized;
 		
 		// Use this for initialization
 		void Start () {
+			EnsureInitialized();
+		}
+
+		public void EnsureInitialized() {
+			if (initialized) return;
+			initialized = true;
+			if (poolInfo == null) poolInfo = new PoolInfo[0];
 			//set instance
 			instance = this;
 			//check for duplicate names
 			CheckForDuplicatePoolNames();
 			//create pools
 			CreatePools();
+		}
+
+		void OnDestroy() { if (instance == this) instance = null; }
+
+		public void RegisterPool(string name, GameObject prefab, int initialCount = 0) {
+			EnsureInitialized();
+			if (string.IsNullOrEmpty(name) || prefab == null) throw new System.ArgumentException("Pool name and prefab are required");
+			if (!poolDictionary.ContainsKey(name)) poolDictionary.Add(name, new Pool(name, prefab, Mathf.Max(0, initialCount), false, transform));
+		}
+
+		// The caller initializes owner, damage and timers before SetActive(true).
+		public GameObject GetInactiveObjectFromPool(string name, Vector3 position, Quaternion rotation) {
+			EnsureInitialized();
+			return poolDictionary.TryGetValue(name, out var pool) ? pool.NextAvailableObject(position, rotation, false) : null;
 		}
 		
 		private void CheckForDuplicatePoolNames() {
@@ -143,7 +167,7 @@ namespace MarchingBytes {
 			foreach (PoolInfo currentPoolInfo in poolInfo) {
 				
 				Pool pool = new Pool(currentPoolInfo.poolName, currentPoolInfo.prefab, 
-				                     currentPoolInfo.poolSize, currentPoolInfo.fixedSize);
+				                     currentPoolInfo.poolSize, currentPoolInfo.fixedSize, transform);
 
 				
 				Debug.Log("Creating pool: " + currentPoolInfo.poolName);
@@ -158,6 +182,7 @@ namespace MarchingBytes {
 		null in case the pool does not have any object available & can grow size is false.
 		*/
 		public GameObject GetObjectFromPool(string poolName, Vector3 position, Quaternion rotation) {
+			EnsureInitialized();
 			GameObject result = null;
 			
 			if(poolDictionary.ContainsKey(poolName)) {

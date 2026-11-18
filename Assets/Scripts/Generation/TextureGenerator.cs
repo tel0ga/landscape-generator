@@ -54,4 +54,22 @@ public class TextureGenerator
         tex.Apply();
         return tex;
     }
+
+    public static Texture2D TextureFromFloatMap(float[,] map)
+    {
+        int w = map.GetLength(0);
+        int h = map.GetLength(1);
+        Texture2D tex = new Texture2D(w, h, TextureFormat.RFloat, false);
+        tex.filterMode = FilterMode.Bilinear;
+        tex.wrapMode = TextureWrapMode.Clamp;
+
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                float v = Mathf.Clamp01(map[x, y]);
+                tex.SetPixel(x, y, new Color(v, 0, 0, 1));
+            }
+        tex.Apply();
+        return tex;
+    }
 }
