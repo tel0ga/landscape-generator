@@ -13,7 +13,9 @@ namespace SurvivalCombat
             var go = CombatArt.Shape("WeaponVisual", Vector2.zero, new Vector2(.8f, .16f), Color.white, false, 30);
             visual = go.transform; visual.SetParent(pivot, false); visual.localPosition = new Vector3(.4f, 0, 0); weaponRenderer = go.GetComponent<SpriteRenderer>();
             Muzzle = new GameObject("Muzzle").transform; Muzzle.SetParent(pivot, false); Muzzle.localPosition = new Vector3(.9f, 0, 0);
-            audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>(); audioSource.spatialBlend = 0;
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.spatialBlend = 0;
             fallbackShot = AudioClip.Create("Prototype shot", 1600, 1, 16000, false);
             var samples = new float[1600]; var random = new System.Random(42);
             for (int i = 0; i < samples.Length; i++) samples[i] = ((float)random.NextDouble() * 2 - 1) * Mathf.Exp(-i / 180f) * .15f;
@@ -23,7 +25,7 @@ namespace SurvivalCombat
         {
             recoil = .16f; audioSource.PlayOneShot(definition.attackSound != null ? definition.attackSound : fallbackShot);
             if (definition.attackKind == AttackKind.Melee)
-                CombatEffect.Line(actor.Pool, transform.position, (Vector2)transform.position + actor.Aim.Direction * definition.range, new Color(.8f, .9f, 1), .15f);
+                CombatEffect.Line(actor.Pool, transform.position, (Vector2)transform.position + WorldProjection.ToWorld(WorldProjection.ToMap(actor.Aim.Direction).normalized * definition.range), new Color(.8f, .9f, 1), .15f);
             else CombatEffect.Line(actor.Pool, Muzzle.position, (Vector2)Muzzle.position + actor.Aim.Direction * .2f, Color.yellow, .05f);
         }
         public void PlayReload(WeaponDefinition definition) { if (definition.reloadSound != null) audioSource.PlayOneShot(definition.reloadSound); }

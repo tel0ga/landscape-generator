@@ -20,6 +20,15 @@ namespace SurvivalCombat
             var ray = camera.ScreenPointToRay(position);
             if (new Plane(Vector3.forward, transform.position).Raycast(ray, out float distance)) SetAim(ray.GetPoint(distance));
         }
-        public AttackContext Context => new AttackContext(actor.View != null ? (Vector2)actor.View.Muzzle.position : (Vector2)transform.position, Direction, Target);
+        public AttackContext Context
+        {
+            get
+            {
+                Vector2 origin = actor.View != null ? (Vector2)actor.View.Muzzle.position : (Vector2)transform.position;
+                Vector2 delta = Target - origin;
+                if ((Target - (Vector2)transform.position).sqrMagnitude <= .0025f || delta.sqrMagnitude <= .0025f) delta = Direction;
+                return new AttackContext(origin, WorldProjection.ToMap(delta).normalized, Target);
+            }
+        }
     }
 }

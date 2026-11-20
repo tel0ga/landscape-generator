@@ -20,6 +20,7 @@ namespace SurvivalCombat
         public void Build(bool arena)
         {
             if (built) return;
+            SceneProjectionState.Apply(gameObject.scene);
             // Establish rendering/audio before initializing inventory or UI.
             var camera = Camera.main;
             if (camera == null)
@@ -34,6 +35,8 @@ namespace SurvivalCombat
                 camera.transform.position = new Vector3(0, 0, -10);
                 camera.transform.rotation = Quaternion.identity;
             }
+            camera.transparencySortMode = TransparencySortMode.CustomAxis;
+            camera.transparencySortAxis = Vector3.up;
             if (FindAnyObjectByType<AudioListener>() == null) camera.gameObject.AddComponent<AudioListener>();
             var catalog = Resources.Load<CombatCatalog>("Combat/DefaultCatalog");
             if (catalog == null) catalog = CombatDefaults.CreateCatalog();
@@ -62,31 +65,32 @@ namespace SurvivalCombat
             if (arena) BuildArena(world, pool, catalog);
             else
             {
-                var bench = CombatArt.Shape("Верстак", (Vector2)player.transform.position + new Vector2(1.5f, -1), new Vector2(1.2f, .6f), new Color(.4f, .25f, .1f));
-                bench.AddComponent<Workbench>();
-                world.AddItem(ItemEntry.FromWeapon(catalog.CreateWeapon("weapon.rifle", Rarity.Uncommon, 20)), (Vector2)player.transform.position + Vector2.up * 2, "starter.rifle");
+                var bench = CombatArt.Shape("Верстак", (Vector2)player.transform.position + WorldProjection.ToWorld(new Vector2(1.5f, -1)), new Vector2(1.2f, .6f), new Color(.4f, .25f, .1f));
+                bench.AddComponent<Workbench>(); GroundSorting.Apply(bench);
+                world.AddItem(ItemEntry.FromWeapon(catalog.CreateWeapon("weapon.rifle", Rarity.Uncommon, 20)), (Vector2)player.transform.position + WorldProjection.ToWorld(Vector2.up * 2), "starter.rifle");
             }
             built = true;
         }
         void Start() { if (player != null && player.Flight != null) player.Flight.isFlying = false; }
         static void BuildArena(CombatWorld world, CombatPool pool, CombatCatalog catalog)
         {
-            CombatArt.Shape("Arena floor", Vector2.zero, new Vector2(36, 24), new Color(.09f, .13f, .17f), false, -100);
+            CombatArt.Shape("Arena floor", Vector2.zero, WorldProjection.ToWorld(new Vector2(36, 24)), new Color(.09f, .13f, .17f), false, -100);
             foreach (var wall in new[] { new Vector4(0, 12, 36, .5f), new Vector4(0, -12, 36, .5f), new Vector4(-18, 0, .5f, 24), new Vector4(18, 0, .5f, 24), new Vector4(5, 2, .25f, 5) })
-                CombatArt.Shape("Wall", new Vector2(wall.x, wall.y), new Vector2(wall.z, wall.w), new Color(.35f, .4f, .5f), false, 5).AddComponent<BoxCollider2D>();
+                CombatArt.Shape("Wall", WorldProjection.ToWorld(new Vector2(wall.x, wall.y)), WorldProjection.ToWorld(new Vector2(wall.z, wall.w)), new Color(.35f, .4f, .5f), false, 5).AddComponent<BoxCollider2D>();
             for (int i = 0; i < 5; i++)
             {
-                var target = CombatArt.Shape("Target " + i, new Vector2(-6 + i * 3, 5), Vector2.one, new Color(.8f, .25f, .2f), true, 20);
+                var target = CombatArt.Shape("Target " + i, WorldProjection.ToWorld(new Vector2(-6 + i * 3, 5)), Vector2.one, new Color(.8f, .25f, .2f), true, 20);
                 target.AddComponent<CircleCollider2D>().radius = .5f;
                 target.AddComponent<Health>().maxHealth = 100;
+                ProjectedFootprint.Apply(target); GroundSorting.Apply(target);
                 target.AddComponent<PersistentDestructible>().Bind("arena.target." + i);
             }
-            var bench = CombatArt.Shape("Workbench", new Vector2(-2, -2), new Vector2(1.5f, .7f), new Color(.55f, .35f, .15f)); bench.AddComponent<Workbench>();
+            var bench = CombatArt.Shape("Workbench", WorldProjection.ToWorld(new Vector2(-2, -2)), new Vector2(1.5f, .7f), new Color(.55f, .35f, .15f)); bench.AddComponent<Workbench>(); GroundSorting.Apply(bench);
             int index = 0;
             foreach (var item in catalog.items)
             {
                 ItemEntry entry = item is WeaponDefinition ? ItemEntry.FromWeapon(catalog.CreateWeapon(item.id, Rarity.Rare, 42 + index)) : new ItemEntry { definitionId = item.id, count = item.kind == ItemKind.Ammo ? 50 : item.kind == ItemKind.Throwable ? 4 : 1 };
-                world.AddItem(entry, new Vector2(-8 + (index % 9) * 2, -4 - index / 9 * 2), "arena.loot." + item.id); index++;
+                world.AddItem(entry, WorldProjection.ToWorld(new Vector2(-8 + (index % 9) * 2, -4 - index / 9 * 2)), "arena.loot." + item.id); index++;
             }
         }
         [System.Serializable] class WorldSettings

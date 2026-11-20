@@ -8,7 +8,7 @@ namespace SurvivalCombat
 {
     [Serializable] public class CombatSaveData
     {
-        public int version = 1; public string worldKey;
+        public int version = 2; public string worldKey;
         public InventoryData inventory; public string[] slots; public int activeSlot; public string throwable;
         public float health, stamina; public Vector2 playerPosition; public WorldSnapshot world;
     }
@@ -27,7 +27,7 @@ namespace SurvivalCombat
             var actor = world.Player;
             return new CombatSaveData { worldKey = world.WorldKey, inventory = Inventory.Copy(actor.Inventory.Data),
                 slots = (string[])actor.Equipment.Slots.Clone(), activeSlot = actor.Equipment.ActiveSlot, throwable = actor.Equipment.ThrowableId,
-                health = actor.Health.Current, stamina = actor.Stamina.CurrentStamina, playerPosition = actor.transform.position, world = Inventory.Copy(world.Data) };
+                health = actor.Health.Current, stamina = actor.Stamina.CurrentStamina, playerPosition = WorldProjection.ToMap(actor.transform.position), world = Inventory.Copy(world.Data) };
         }
         public ActionResult TrySave()
         {
@@ -35,6 +35,12 @@ namespace SurvivalCombat
             {
                 var data = Capture(); if (!Validate(data)) return new ActionResult(Failure.SaveError);
                 Directory.CreateDirectory(System.IO.Path.GetDirectoryName(Path));
+                if (File.Exists(Path) && !File.Exists(Path + ".v1.bak"))
+                {
+                    string previousPath = ReadValid(Path) != null ? Path : Path + ".bak";
+                    var previous = ReadValid(previousPath);
+                    if (previous != null && previous.version == 1) File.Copy(previousPath, Path + ".v1.bak");
+                }
                 string temporary = Path + ".tmp";
                 using (var stream = new FileStream(temporary, FileMode.Create, FileAccess.Write, FileShare.None))
                 using (var writer = new StreamWriter(stream)) { writer.Write(JsonUtility.ToJson(data, true)); writer.Flush(); stream.Flush(true); }
@@ -46,7 +52,7 @@ namespace SurvivalCombat
         }
         public bool Validate(CombatSaveData data)
         {
-            if (data == null || data.version != 1 || data.worldKey != world.WorldKey || !world.Player.Inventory.Validate(data.inventory) || data.world == null || data.world.items == null || data.world.destroyedIds == null || data.world.consumedGeneratedIds == null) return false;
+            if (data == null || (data.version != 1 && data.version != 2) || data.worldKey != world.WorldKey || !world.Player.Inventory.Validate(data.inventory) || data.world == null || data.world.items == null || data.world.destroyedIds == null || data.world.consumedGeneratedIds == null) return false;
             if (!Finite(data.health) || data.health < 0 || data.health > world.Player.Health.maxHealth || !Finite(data.stamina) || data.stamina < 0 || data.stamina > world.Player.Stamina.MaxStamina || !Finite(data.playerPosition.x) || !Finite(data.playerPosition.y)) return false;
             if (data.slots == null || data.slots.Length != 2 || data.activeSlot < 0 || data.activeSlot > 1) return false;
             foreach (string slot in data.slots) if (!string.IsNullOrEmpty(slot) && data.inventory.entries.Find(e => e.instanceId == slot)?.weapon == null) return false;
@@ -77,10 +83,11 @@ namespace SurvivalCombat
             actor.Inventory.Restore(data.inventory); actor.Equipment.Restore(data.slots, data.activeSlot, data.throwable);
             actor.Health.Restore(data.health); actor.Stamina.RestoreStamina(data.stamina);
             actor.GetComponent<StatusEffectController>().Clear();
-            actor.transform.position = data.playerPosition;
-            if (actor.TryGetComponent<Rigidbody2D>(out var body)) { body.position = data.playerPosition; body.linearVelocity = Vector2.zero; }
+            actor.transform.position = WorldProjection.ToWorld(data.playerPosition);
+            if (actor.TryGetComponent<Rigidbody2D>(out var body)) { body.position = WorldProjection.ToWorld(data.playerPosition); body.linearVelocity = Vector2.zero; }
             actor.GetComponent<PlayerMovement>()?.ClearKnockback();
             world.Restore(data.world); Physics2D.SyncTransforms();
+            SnowTracks.SnowFootprintEmitter.ResetFor(actor.gameObject);
             Completed?.Invoke("Загружено"); return ActionResult.Ok;
         }
         CombatSaveData ReadValid(string path)

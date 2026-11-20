@@ -104,9 +104,9 @@ namespace SurvivalCombat
     }
     public struct AttackContext
     {
-        public Vector2 origin, direction, target;
+        public Vector2 origin, mapDirection, target; // origin/target: Unity world; mapDirection: normalized map vector
         public AttackContext(Vector2 origin, Vector2 direction, Vector2 target)
-        { this.origin = origin; this.direction = direction.sqrMagnitude > .0001f ? direction.normalized : Vector2.right; this.target = target; }
+        { this.origin = origin; this.mapDirection = direction.sqrMagnitude > .0001f ? direction.normalized : Vector2.right; this.target = target; }
     }
     public struct DamageInfo
     {

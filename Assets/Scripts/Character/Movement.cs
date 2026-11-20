@@ -72,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
 
         // ==== 2. Проверяем, реально ли игрок двигается (не уперся в стену) ====
         // Смотрим на фактическую скорость Rigidbody2D
-        float actualSpeed = rb.linearVelocity.magnitude;
+        float actualSpeed = WorldProjection.ToMap(rb.linearVelocity).magnitude;
         bool isActuallyMoving = actualSpeed > movementThreshold;
 
         // ==== 3. Проверяем, разрешен ли бег (по стамине) ====
@@ -92,11 +92,11 @@ public class PlayerMovement : MonoBehaviour
         var effects = GetComponent<SurvivalCombat.StatusEffectController>();
         if (effects != null) currentSpeed *= effects.MovementMultiplier;
 
-        rb.linearVelocity = Vector2.LerpUnclamped(
-            rb.linearVelocity - appliedKnockback,
+        rb.linearVelocity = WorldProjection.ToWorld(Vector2.LerpUnclamped(
+            WorldProjection.ToMap(rb.linearVelocity) - appliedKnockback,
             moveInput * currentSpeed,
             smoothing
-        ) + knockback;
+        ) + knockback);
         appliedKnockback = knockback;
         knockback = Vector2.MoveTowards(knockback, Vector2.zero, 15f * Time.fixedDeltaTime);
     }

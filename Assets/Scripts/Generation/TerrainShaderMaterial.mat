@@ -79,6 +79,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 414dd72ca475a3048905ab57fda5420d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SnowTracks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _WaterLocalTex:
         m_Texture: {fileID: 2800000, guid: 6edee982b8c3cf84f8ce72aa557476f0, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -93,7 +97,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BlendWidth: 0.005
+    - _BlendWidth: 0.001
     - _CausticsDepthFade: 0.61
     - _CausticsIntensity: 0.07
     - _CausticsScale: 0.28
@@ -115,8 +119,8 @@ Material:
     - _LightDirY: -0.7
     - _LightDirZ: 40.81
     - _NoiseLacunarity: 2
-    - _NoiseMax: 2.4960938
-    - _NoiseMin: -1.4960938
+    - _NoiseMax: 2.2504516
+    - _NoiseMin: -1.2504516
     - _NoiseOctaves: 3
     - _NoisePersistence: 0.57
     - _NoiseScale: 0.89
@@ -129,7 +133,7 @@ Material:
     - _ShimmerAmount: 0.23
     - _SnowAmbient: 0.26
     - _SnowCoverageBlend: 0
-    - _SnowCoverageThreshold: 0.66
+    - _SnowCoverageThreshold: 0.3550775
     - _SnowInValleys: 1
     - _SnowNormalStrength: 10.08
     - _SnowPadding: 0.03816794
@@ -139,6 +143,10 @@ Material:
     - _SnowShadowStrength: 0
     - _SnowShadowThreshold: 0.212
     - _SnowTexelSize: 0.001908397
+    - _SnowTrackDarkening: 0.12
+    - _SnowTrackDepth: 0.075
+    - _SnowTracksEnabled: 0
+    - _SnowTrailReveal: 0.2
     - _TexScale: 0.5
     - _VariationBrightness: 0.19
     - _VariationHue: 0.61
@@ -163,5 +171,6 @@ Material:
     - _SnowHighlightColor: {r: 1, g: 1, b: 1, a: 1}
     - _SnowShadowColor: {r: 0.71715915, g: 0.84168833, b: 0.9622642, a: 1}
     - _SnowTint: {r: 1, g: 1, b: 1, a: 1}
+    - _SnowTrackUV: {r: 0.9846154, g: 0.0076923, b: 0.0038462, a: 0.05859375}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

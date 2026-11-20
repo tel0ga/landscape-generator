@@ -17,14 +17,16 @@ namespace SurvivalCombat
             });
             var grenade = go.GetComponent<CombatGrenade>(); grenade.pool = pool; grenade.owner = actor.Health;
             grenade.profile = Inventory.Copy(profile); grenade.start = actor.transform.position;
-            Vector2 delta = context.target - grenade.start;
-            grenade.end = grenade.start + Vector2.ClampMagnitude(delta, Mathf.Max(.1f, profile.range));
-            if (CombatPhysics.Cast(grenade.start, (grenade.end - grenade.start).normalized, Vector2.Distance(grenade.start, grenade.end), .1f, actor.Health, out var hit))
+            Vector2 delta = WorldProjection.ToMap(context.target - grenade.start);
+            grenade.end = grenade.start + WorldProjection.ToWorld(Vector2.ClampMagnitude(delta, Mathf.Max(.1f, profile.range)));
+            if (ProjectedCast.Cast(grenade.start, delta.normalized, WorldProjection.Distance(grenade.start, grenade.end), .1f, actor.Health, out var hit))
                 grenade.end = hit.centroid - (grenade.end - grenade.start).normalized * .03f;
             grenade.began = Time.time; grenade.visual = go.transform.GetChild(0);
             go.transform.position = grenade.start; go.transform.localScale = Vector3.one;
             go.GetComponent<SpriteRenderer>().transform.localScale = Vector3.one;
             go.GetComponent<SpriteRenderer>().sprite = CombatArt.Circle;
+            go.GetComponent<SpriteRenderer>().drawMode = SpriteDrawMode.Sliced;
+            go.GetComponent<SpriteRenderer>().size = new Vector2(.3f, .15f);
             grenade.visual.GetComponent<SpriteRenderer>().color = profile.incendiary ? new Color(1, .4f, .1f) : Color.green;
             go.SetActive(true);
         }

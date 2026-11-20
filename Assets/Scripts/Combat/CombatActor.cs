@@ -26,6 +26,11 @@ namespace SurvivalCombat
         public void Initialize(CombatCatalog catalog, CombatPool pool, CombatWorld world, bool starterItems = true)
         {
             if (Inventory != null) return;
+            if (EndlessTerain.snowFootprints)
+            {
+                ProjectedFootprint.Apply(gameObject);
+            }
+            GroundSorting.Apply(gameObject);
             Catalog = catalog; Pool = pool; World = world; Inventory = new Inventory(catalog);
             Health = GetComponent<Health>() ?? gameObject.AddComponent<Health>();
             Stamina = GetComponent<StaminaSystem>() ?? gameObject.AddComponent<StaminaSystem>();
@@ -64,7 +69,7 @@ namespace SurvivalCombat
         public ActionResult TryPickup(WorldItem item)
         {
             if (Blocked || item == null || World == null) return new ActionResult(Failure.Disabled);
-            if (Vector2.Distance(transform.position, item.transform.position) > 2.2f) return new ActionResult(Failure.TooFar);
+            if (WorldProjection.Distance(transform.position, item.transform.position) > 2.2f) return new ActionResult(Failure.TooFar);
             if (CombatPhysics.WallBetween(transform.position, item.transform.position)) return new ActionResult(Failure.TooFar);
             return World.TryPickup(this, item.RecordId);
         }
@@ -72,7 +77,7 @@ namespace SurvivalCombat
         {
             if (!Weapons.CanManageEquipment || World == null) return new ActionResult(Failure.Busy);
             var entry = Inventory.Find(id); if (entry == null) return new ActionResult(Failure.Invalid);
-            Vector2 position = (Vector2)transform.position + Aim.Direction * .9f;
+            Vector2 position = (Vector2)transform.position + WorldProjection.ToWorld(WorldProjection.ToMap(Aim.Direction).normalized * .9f);
             if (CombatPhysics.WallBetween(transform.position, position)) position = transform.position;
             if (!World.AddItem(entry, position)) return new ActionResult(Failure.Invalid);
             Weapons.CancelReload(); Inventory.Remove(id); return ActionResult.Ok;

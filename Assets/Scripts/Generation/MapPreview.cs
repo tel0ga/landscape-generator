@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [ExecuteAlways]
 public class MapPreview : MonoBehaviour
@@ -123,7 +123,7 @@ public class MapPreview : MonoBehaviour
         targetMaterial.SetFloat("_SnowTexelSize", 1.0f / snowRes);
         targetMaterial.SetFloat("_SnowPadding", (float)generator.snowPadding / snowRes);
 
-        transform.localScale = new Vector3(worldSize, worldSize, 1f);
+        transform.localScale = new Vector3(worldSize, worldSize * WorldProjection.VerticalScale, 1f);
 
 #if UNITY_EDITOR
         UnityEditor.SceneView.RepaintAll();

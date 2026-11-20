@@ -50,7 +50,7 @@ public class FlyingMode : MonoBehaviour
     void FixedUpdate()
     {
         if (body == null) return;
-        body.linearVelocity = flying ? controls.Player.Move.ReadValue<Vector2>().normalized * flyingSpeed : Vector2.zero;
+        body.linearVelocity = flying ? WorldProjection.ToWorld(controls.Player.Move.ReadValue<Vector2>().normalized * flyingSpeed) : Vector2.zero;
         if (flying && player != null)
         {
             player.transform.position = transform.position;

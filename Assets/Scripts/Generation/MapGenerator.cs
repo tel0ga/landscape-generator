@@ -43,6 +43,9 @@ public class MapGenerator : MonoBehaviour
     const int maxCallbacksPerQueuePerFrame = 8;
     readonly object queueLock = new object();
     bool isDestroyed;
+    readonly Queue<System.Action> pendingGeneration = new Queue<System.Action>();
+    int runningWorkers;
+    const int workerLimit = 4;
     readonly Queue<MapThreadInfo<MapData>> mapDataThreadInfoQueue = new Queue<MapThreadInfo<MapData>>();
     readonly Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
@@ -69,12 +72,7 @@ public class MapGenerator : MonoBehaviour
 
     public void RequestMapData(Vector2 centre, System.Action<MapData> callback)
     {
-        lock (queueLock)
-        {
-            if (isDestroyed) return;
-        }
-        ThreadStart threadStart = delegate { MapDataThread(centre, callback); };
-        new Thread(threadStart) { IsBackground = true }.Start();
+        QueueGeneration(() => MapDataThread(centre, callback));
     }
 
     void MapDataThread(Vector2 centre, System.Action<MapData> callback)
@@ -89,12 +87,35 @@ public class MapGenerator : MonoBehaviour
 
     public void RequestMeshData(MapData mapData, System.Action<MeshData> callback)
     {
+        QueueGeneration(() => MeshDataThread(mapData, callback));
+    }
+
+    // The compressed view contains more rows. Bound CPU work instead of creating a thread per chunk.
+    void QueueGeneration(System.Action work)
+    {
         lock (queueLock)
         {
             if (isDestroyed) return;
+            pendingGeneration.Enqueue(work);
+            if (runningWorkers >= workerLimit) return;
+            runningWorkers++;
+            ThreadPool.QueueUserWorkItem(_ => RunGeneration());
         }
-        ThreadStart threadStart = delegate { MeshDataThread(mapData, callback); };
-        new Thread(threadStart) { IsBackground = true }.Start();
+    }
+
+    void RunGeneration()
+    {
+        while (true)
+        {
+            System.Action work;
+            lock (queueLock)
+            {
+                if (isDestroyed || pendingGeneration.Count == 0) { runningWorkers--; return; }
+                work = pendingGeneration.Dequeue();
+            }
+            try { work(); }
+            catch (System.Exception exception) { Debug.LogException(exception); }
+        }
     }
 
     void MeshDataThread(MapData mapData, System.Action<MeshData> callback)
@@ -142,6 +163,7 @@ public class MapGenerator : MonoBehaviour
         lock (queueLock)
         {
             isDestroyed = true;
+            pendingGeneration.Clear();
             mapDataThreadInfoQueue.Clear();
             meshDataThreadInfoQueue.Clear();
         }

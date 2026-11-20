@@ -32,7 +32,7 @@ namespace SurvivalCombat
         {
             if (item == null || Data.items.Exists(record => record.item.instanceId == item.instanceId)) return false;
             if (generatedId != null && (Data.consumedGeneratedIds.Contains(generatedId) || Data.items.Exists(record => record.generatedId == generatedId))) return false;
-            Data.items.Add(new WorldItemRecord { item = Inventory.Copy(item), position = position, generatedId = generatedId });
+            Data.items.Add(new WorldItemRecord { item = Inventory.Copy(item), position = WorldProjection.ToMap(position), generatedId = generatedId });
             nextRefresh = 0; return true;
         }
         public bool IsDestroyed(string id) => !string.IsNullOrEmpty(id) && Data.destroyedIds.Contains(id);
@@ -52,7 +52,7 @@ namespace SurvivalCombat
             WorldItem best = null; float distance = range * range;
             foreach (var view in views.Values)
             {
-                float sqr = ((Vector2)view.transform.position - position).sqrMagnitude;
+                float sqr = WorldProjection.SqrDistance(view.transform.position, position);
                 if (sqr < distance && !CombatPhysics.WallBetween(position, view.transform.position)) { best = view; distance = sqr; }
             }
             return best;
@@ -73,7 +73,7 @@ namespace SurvivalCombat
             var keep = new HashSet<string>();
             foreach (var record in Data.items)
             {
-                if ((record.position - centre).sqrMagnitude > 60 * 60) continue;
+                if ((WorldProjection.ToWorld(record.position) - centre).sqrMagnitude > 60 * 60) continue;
                 keep.Add(record.recordId); if (views.ContainsKey(record.recordId)) continue;
                 var definition = Catalog.Find(record.item.definitionId); if (definition == null) continue;
                 var go = pool.Acquire("world." + definition.id, () =>
@@ -83,7 +83,8 @@ namespace SurvivalCombat
                     return created;
                 });
                 foreach (var collider in go.GetComponentsInChildren<Collider2D>()) collider.enabled = false;
-                go.transform.position = record.position;
+                go.transform.position = WorldProjection.ToWorld(record.position);
+                GroundSorting.Apply(go);
                 var view = go.GetComponent<WorldItem>(); view.Bind(record.recordId, definition.displayName); go.SetActive(true); views.Add(record.recordId, view);
             }
             foreach (string id in new List<string>(views.Keys)) if (!keep.Contains(id)) { pool.Release(views[id].gameObject); views.Remove(id); }

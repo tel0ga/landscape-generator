@@ -45,7 +45,7 @@ namespace SurvivalCombat
             {
                 var movement = GetComponent<PlayerMovement>();
                 if (movement != null) movement.AddKnockback(info.direction.normalized * info.knockback);
-                else if (TryGetComponent<Rigidbody2D>(out var body)) body.AddForce(info.direction.normalized * info.knockback, ForceMode2D.Impulse);
+                else if (TryGetComponent<Rigidbody2D>(out var body)) body.AddForce(WorldProjection.ToWorld(info.direction.normalized * info.knockback), ForceMode2D.Impulse);
             }
             if (!Dead && info.effect != null && info.effect.kind != EffectKind.None)
                 (GetComponent<StatusEffectController>() ?? gameObject.AddComponent<StatusEffectController>()).Apply(info.effect, info.owner);

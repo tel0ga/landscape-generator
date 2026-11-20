@@ -40,10 +40,10 @@ namespace SurvivalCombat
             for (int i = 0; i < Mathf.Max(1, definition.fire.pellets); i++)
             {
                 float angle = UnityEngine.Random.Range(-stats.spread * .5f, stats.spread * .5f);
-                Vector2 direction = Quaternion.Euler(0, 0, angle) * context.direction;
-                Vector2 end = origin + direction * definition.range;
+                Vector2 direction = Quaternion.Euler(0, 0, angle) * context.mapDirection;
+                Vector2 end = origin + WorldProjection.ToWorld(direction * definition.range);
                 if (obstruction.collider != null) { damage.direction = direction; Hit(obstruction, damage); end = origin; }
-                else if (Cast(origin, direction, definition.range, 0, actor.Health, out var hit)) { damage.direction = direction; Hit(hit, damage); end = hit.point; }
+                else if (ProjectedCast.Cast(origin, direction, definition.range, 0, actor.Health, out var hit)) { damage.direction = direction; Hit(hit, damage); end = hit.point; }
                 CombatEffect.Line(actor.Pool, origin, end, new Color(1, .85f, .35f), .07f);
             }
         }
@@ -54,8 +54,9 @@ namespace SurvivalCombat
             {
                 var target = collider.GetComponentInParent<Health>();
                 if (target == null || target == actor.Health || target.Dead || hitSet.Contains(target)) continue;
-                Vector2 point = collider.ClosestPoint(origin); Vector2 delta = point - origin;
-                if (delta.sqrMagnitude > .001f && Vector2.Angle(context.direction, delta) > definition.melee.angle * .5f) continue;
+                Vector2 point = target.transform.position; Vector2 delta = WorldProjection.ToMap(point - origin);
+                if (delta.magnitude > definition.range) continue;
+                if (delta.sqrMagnitude > .001f && Vector2.Angle(context.mapDirection, delta) > definition.melee.angle * .5f) continue;
                 if (WallBetween(origin, point)) continue;
                 hitSet.Add(target); damage.point = point; damage.direction = delta.normalized; target.ReceiveDamage(damage);
             }
@@ -67,11 +68,12 @@ namespace SurvivalCombat
             {
                 var target = collider.GetComponentInParent<Health>();
                 if (target == null || targets.Contains(target)) continue;
-                Vector2 point = collider.ClosestPoint(origin);
+                Vector2 point = target.transform.position;
+                if (WorldProjection.Distance(origin, point) > radius) continue;
                 if (WallBetween(origin, point)) continue;
                 targets.Add(target); var hit = damage; hit.point = point;
-                hit.direction = ((Vector2)target.transform.position - origin).normalized;
-                if (falloff) hit.damage *= 1 - Mathf.Clamp01(Vector2.Distance(origin, point) / Mathf.Max(.01f, radius));
+                hit.direction = WorldProjection.ToMap((Vector2)target.transform.position - origin).normalized;
+                if (falloff) hit.damage *= 1 - Mathf.Clamp01(WorldProjection.Distance(origin, point) / Mathf.Max(.01f, radius));
                 target.ReceiveDamage(hit);
             }
         }

@@ -46,7 +46,7 @@ namespace SurvivalCombat
             if (load.WasPressedThisFrame()) actor.Report(actor.World.Save.TryLoad());
             if (actor.Blocked || Time.timeScale <= 0) return;
             Vector2 gamepad = stick.ReadValue<Vector2>();
-            if (gamepad.sqrMagnitude > .04f) actor.Aim.SetAim((Vector2)transform.position + gamepad.normalized * 10);
+            if (gamepad.sqrMagnitude > .04f) actor.Aim.SetAim((Vector2)transform.position + WorldProjection.ToWorld(gamepad.normalized * 10));
             else actor.Aim.AimAtScreen(aim.ReadValue<Vector2>());
             if (slot1.WasPressedThisFrame()) actor.Report(actor.Equipment.TryEquip(0));
             if (slot2.WasPressedThisFrame()) actor.Report(actor.Equipment.TryEquip(1));

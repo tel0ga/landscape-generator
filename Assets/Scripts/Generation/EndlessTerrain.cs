@@ -1,4 +1,4 @@
-﻿using MarchingBytes;
+using MarchingBytes;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -24,8 +24,12 @@ public class EndlessTerain : MonoBehaviour
     Vector2 viewerPositionOldForDelete;
 
     MapGenerator mapGenerator;
+    SnowTracks.SnowTrackWorld snowTracks;
+    public SnowTracks.SnowTrackMode snowTrackMode = SnowTracks.SnowTrackMode.FullSnow;
     int chunkSize;
-    int chunksVisibleInViewDst;
+    int chunksVisibleX, chunksVisibleY;
+    float viewRadius;
+    float canopyMargin = 12f;
 
     public Material mapMaterial;         // для PixelColours
     public Material shaderMapMaterial;   // для ShaderTextures
@@ -35,11 +39,26 @@ public class EndlessTerain : MonoBehaviour
     readonly Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
     readonly List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
 
+    [SerializeField]
+    public static bool snowFootprints = false;
     void Start()
     {
         mapGenerator = FindAnyObjectByType<MapGenerator>();
+        if (mapGenerator.renderMode == MapGenerator.RenderMode.ShaderTextures && shaderMapMaterial != null && snowTrackMode != SnowTracks.SnowTrackMode.Off)
+        {
+            snowTracks = GetComponent<SnowTracks.SnowTrackWorld>();
+            if (snowTracks == null) snowTracks = gameObject.AddComponent<SnowTracks.SnowTrackWorld>();
+            snowTracks.SetMode(snowTrackMode);
+            snowTracks.Initialize(shaderMapMaterial);
+        }
         chunkSize = Mathf.RoundToInt(MapGenerator.worldChunkSize);
-        chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
+        var pool = FindAnyObjectByType<EasyObjectPool>();
+        if (pool != null && pool.poolInfo != null)
+            foreach (var entry in pool.poolInfo)
+                if (entry.prefab != null)
+                    foreach (var renderer in entry.prefab.GetComponentsInChildren<SpriteRenderer>(true))
+                        canopyMargin = Mathf.Max(canopyMargin, ((Vector2)(renderer.bounds.center - entry.prefab.transform.position)).magnitude + ((Vector2)renderer.bounds.extents).magnitude);
+        UpdateViewRadius();
         viewerPosition = new Vector2(viewer.position.x, viewer.position.y);
         viewerPositionOld = viewerPosition;
         viewerPositionOldForDelete = viewerPosition;
@@ -57,7 +76,9 @@ public class EndlessTerain : MonoBehaviour
     private void Update()
     {
         viewerPosition = new Vector2(viewer.position.x, viewer.position.y);
-        if ((viewerPosition - viewerPositionOld).sqrMagnitude > sqrUpdateThreshold)
+        float previousRadius = viewRadius;
+        UpdateViewRadius();
+        if ((viewerPosition - viewerPositionOld).sqrMagnitude > sqrUpdateThreshold || Mathf.Abs(previousRadius - viewRadius) > .1f)
         {
             viewerPositionOld = viewerPosition;
             UpdateVisibleChunks();
@@ -69,20 +90,31 @@ public class EndlessTerain : MonoBehaviour
         }
     }
 
+    void UpdateViewRadius()
+    {
+        var camera = Camera.main;
+        viewRadius = maxViewDst;
+        if (camera != null && camera.orthographic)
+            viewRadius = Mathf.Max(viewRadius, camera.orthographicSize * Mathf.Sqrt(1 + camera.aspect * camera.aspect));
+        viewRadius += canopyMargin + updateThreshold;
+        chunksVisibleX = Mathf.CeilToInt(viewRadius / chunkSize) + 1;
+        chunksVisibleY = Mathf.CeilToInt(viewRadius / (chunkSize * WorldProjection.VerticalScale)) + 1;
+    }
+
     void UpdateVisibleChunks()
     {
         Dictionary<Vector2, TerrainChunk> chunksForDelete = new Dictionary<Vector2, TerrainChunk>();
         for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++)
         {
-            chunksForDelete.Add(terrainChunksVisibleLastUpdate[i].position, terrainChunksVisibleLastUpdate[i]);
+            chunksForDelete.Add(terrainChunksVisibleLastUpdate[i].coord, terrainChunksVisibleLastUpdate[i]);
         }
         terrainChunksVisibleLastUpdate.Clear();
-        int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
-        int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / chunkSize);
+        int currentChunkCoordX = Mathf.RoundToInt(WorldProjection.ToMap(viewerPosition).x / chunkSize);
+        int currentChunkCoordY = Mathf.RoundToInt(WorldProjection.ToMap(viewerPosition).y / chunkSize);
 
-        for (int yOffset = -chunksVisibleInViewDst; yOffset <= chunksVisibleInViewDst; yOffset++)
+        for (int yOffset = -chunksVisibleY; yOffset <= chunksVisibleY; yOffset++)
         {
-            for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++)
+            for (int xOffset = -chunksVisibleX; xOffset <= chunksVisibleX; xOffset++)
             {
                 Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
@@ -96,6 +128,8 @@ public class EndlessTerain : MonoBehaviour
                 }
                 else
                 {
+                    if (WorldProjection.ProjectBounds(viewedChunkCoord * chunkSize, Vector2.one * chunkSize).SqrDistance(viewerPosition) > viewRadius * viewRadius)
+                        continue;
                     Material mat = (mapGenerator.renderMode == MapGenerator.RenderMode.PixelColours)
                         ? mapMaterial
                         : shaderMapMaterial;
@@ -130,7 +164,9 @@ public class EndlessTerain : MonoBehaviour
     public class TerrainChunk
     {
         GameObject meshObject;
-        public Vector2 position;
+        public readonly Vector2Int coord;
+        public readonly Vector2 mapCentre;
+        public Vector2 position => WorldProjection.ToWorld(mapCentre);
         Bounds bounds;
         MeshRenderer meshRenderer;
         MeshFilter meshFilter;
@@ -149,12 +185,15 @@ public class EndlessTerain : MonoBehaviour
         public TerrainChunk(Vector2 coord, int size, Transform parent, Material material, EndlessTerain owner)
         {
             this.owner = owner;
-            position = coord * size;
-            bounds = new Bounds(position, Vector2.one * size);
+            this.coord = Vector2Int.RoundToInt(coord);
+            mapCentre = coord * size;
+            bounds = WorldProjection.ProjectBounds(mapCentre, Vector2.one * size);
             Vector3 positionV3 = new Vector3(position.x, position.y, 0);
 
             meshObject = new GameObject("Terrain Chunk");
             meshRenderer = meshObject.AddComponent<MeshRenderer>();
+            // Reserve the bottom order for terrain; ground effects occupy negative orders above it.
+            meshRenderer.sortingOrder = short.MinValue;
             meshFilter = meshObject.AddComponent<MeshFilter>();
 
             meshRenderer.sharedMaterial = material;
@@ -163,7 +202,7 @@ public class EndlessTerain : MonoBehaviour
             meshObject.transform.parent = parent;
             SetVisible(false);
 
-            owner.mapGenerator.RequestMapData(position, OnMapDataRecieved);
+            owner.mapGenerator.RequestMapData(mapCentre, OnMapDataRecieved);
         }
 
         void OnMapDataRecieved(MapData mapData)
@@ -211,16 +250,17 @@ public class EndlessTerain : MonoBehaviour
 
                 float halfSize = MapGenerator.worldChunkSize / 2f;
                 Vector4 chunkOrigin = new Vector4(
-                    position.x - halfSize,
-                    position.y - halfSize, 0, 0);
+                    mapCentre.x - halfSize,
+                    mapCentre.y - halfSize, 0, 0);
                 props.SetVector("_ChunkOrigin", chunkOrigin);
                 props.SetFloat("_ChunkSize", MapGenerator.worldChunkSize);
 
                 meshRenderer.SetPropertyBlock(props);
+                owner.snowTracks?.Register(coord, mapData, owner.mapGenerator.snowPadding, meshRenderer);
             }
 
             // Деревья
-            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 2, position, treeSpacing, MapGenerator.PixelsPerUnit, owner.mapGenerator.seed);
+            natureObjects = ObjectsGenerator.GenerateObjects(mapData.heightMap, 2, mapCentre, treeSpacing, MapGenerator.PixelsPerUnit, owner.mapGenerator.seed);
             natureGameObjects = new GameObject[natureObjects.Length];
 
             hasMapData = true;
@@ -240,7 +280,7 @@ public class EndlessTerain : MonoBehaviour
         {
             if (isDeleted || owner == null || meshObject == null) return;
             float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(owner.viewerPosition));
-            bool visible = hasMapData && hasMeshData && viewerDstFromNearestEdge <= maxViewDst;
+            bool visible = hasMapData && hasMeshData && viewerDstFromNearestEdge <= owner.viewRadius;
 
             if (natureGameObjects.Length != 0)
             {
@@ -254,9 +294,17 @@ public class EndlessTerain : MonoBehaviour
                         if (world != null && world.IsDestroyed(natureObjects[i].stableId)) continue;
                         natureGameObjects[i] = naturePool.GetObjectFromPool(
                             natureObjects[i].objectName,
-                            natureObjects[i].position,
+                            WorldProjection.ToWorld(natureObjects[i].position),
                             Quaternion.identity
                         );
+                        if (natureGameObjects[i] != null)
+                        {
+                            if (snowFootprints)
+                            {
+                                ProjectedFootprint.Apply(natureGameObjects[i]);
+                            }
+                            GroundSorting.Apply(natureGameObjects[i]);
+                        }
                         if (natureGameObjects[i] != null && world != null)
                         {
                             var persistent = natureGameObjects[i].GetComponent<SurvivalCombat.PersistentDestructible>() ?? natureGameObjects[i].AddComponent<SurvivalCombat.PersistentDestructible>();
@@ -291,6 +339,7 @@ public class EndlessTerain : MonoBehaviour
         {
             if (isDeleted) return;
             isDeleted = true;
+            owner.snowTracks?.Unregister(coord);
             owner.terrainChunksVisibleLastUpdate.Remove(this);
             ReturnNatureObjects();
             if (meshObject != null) meshObject.SetActive(false);
@@ -327,6 +376,7 @@ public class EndlessTerain : MonoBehaviour
         {
             if (isDeleted || meshObject == null) return;
             meshObject.SetActive(visible && hasMapData && hasMeshData);
+            owner.snowTracks?.SetVisible(coord, visible && hasMapData && hasMeshData);
         }
 
         public bool IsVisible()

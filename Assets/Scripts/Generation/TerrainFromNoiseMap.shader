@@ -4,6 +4,12 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
     {
         _NoiseMap ("Noise Map", 2D) = "white" {}
         _SnowMap ("Snow Coverage Map", 2D) = "black" {}
+        [HideInInspector] _SnowTracks ("Dynamic Snow Tracks", 2D) = "black" {}
+        [HideInInspector] _SnowTracksEnabled ("Snow Tracks Enabled", Float) = 0
+        [HideInInspector] _SnowTrackUV ("Snow Track UV", Vector) = (0.9846154,0.0076923,0.0038462,0.05859375)
+        _SnowTrackDepth ("Footprint Relief", Range(0,0.2)) = 0.075
+        _SnowTrackDarkening ("Packed Snow Darkening", Range(0,0.3)) = 0.12
+        _SnowTrailReveal ("Packed Trail Ground Reveal", Range(0,0.35)) = 0.20
         _NoiseMin ("Noise Min", Float) = -2.335
         _NoiseMax ("Noise Max", Float) = 3.335
         _ChunkOrigin ("Chunk Origin", Vector) = (0,0,0,0)
@@ -119,6 +125,10 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
             sampler2D _NoiseMap;
             sampler2D _SnowMap;
+            sampler2D _SnowTracks;
+            float _SnowTracksEnabled;
+            float4 _SnowTrackUV;
+            float _SnowTrackDepth, _SnowTrackDarkening, _SnowTrailReveal;
             float _NoiseMin, _NoiseMax;
             float4 _ChunkOrigin;
             float _ChunkSize;
@@ -199,7 +209,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
             float smoothWeight(float h, float threshold, float width)
             {
-                return smoothstep(threshold - width, threshold + width, h);
+                return width <= 0.000001 ? step(threshold, h) : smoothstep(threshold - width, threshold + width, h);
             }
 
             float hash2D(float2 p)
@@ -278,7 +288,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float2 snappedWorldPos = floor(i.worldPos.xy * _PPU) / _PPU;
+                float2 snappedWorldPos = floor(float2(i.worldPos.x, i.worldPos.y * 2.0) * _PPU) / _PPU;
 
                 // 1. Шум ландшафта
                 float2 noiseUV = (snappedWorldPos - _ChunkOrigin.xy) / _ChunkSize;
@@ -325,13 +335,18 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
                 float heightSnowWeight = t6;
 
-                float coverageWeight = smoothstep(
-                    _SnowCoverageThreshold - _SnowCoverageBlend,
-                    _SnowCoverageThreshold + _SnowCoverageBlend,
-                    snowCoverage
-                );
+                float coverageWeight = smoothWeight(snowCoverage, _SnowCoverageThreshold, _SnowCoverageBlend);
 
                 float wSnow = saturate(heightSnowWeight + coverageWeight * _SnowInValleys);
+                // Track UVs live in map space, with two texels of adjacent-chunk padding.
+                float2 trackUV = noiseUV * _SnowTrackUV.x + _SnowTrackUV.y;
+                float trackGate = _SnowTracksEnabled * step(0.99, t0) * step(0.05, wSnow);
+                float2 track = tex2D(_SnowTracks, trackUV).rg * trackGate;
+                float2 tx = float2(_SnowTrackUV.z,0), ty = float2(0,_SnowTrackUV.z);
+                float depthL = tex2D(_SnowTracks,trackUV-tx).r * trackGate;
+                float depthR = tex2D(_SnowTracks,trackUV+tx).r * trackGate;
+                float depthD = tex2D(_SnowTracks,trackUV-ty).r * trackGate;
+                float depthU = tex2D(_SnowTracks,trackUV+ty).r * trackGate;
 
                 // ============================================================
                 // СТИЛИЗОВАННЫЕ РЕЗКИЕ НОРМАЛИ СНЕГА
@@ -344,6 +359,8 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
                 // Градиент — куда «смотрит» склон
                 float2 grad = float2(hR - hL, hU - hD) * _SnowNormalStrength;
+                grad *= 1.0 - track.g * 0.65;
+                grad -= float2(depthR-depthL,depthU-depthD) * (_SnowTrackDepth / max(2.0*_SnowTrackUV.w,0.0001));
 
                 // Направление света (нормализованный вектор)
                 float3 lightDir = normalize(float3(_LightDirX, _LightDirY, _LightDirZ));
@@ -430,6 +447,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
 
                 // Применяем стилизованное освещение к снегу
                 snow.rgb *= snowLitColor;
+                snow.rgb *= 1.0 - _SnowTrackDarkening * saturate(track.r * 0.7 + track.g * 0.3);
 
                 // Затеняем траву/камни под снегом
                 float3 underSnow = 1.0 - wSnow * 0.25;
@@ -488,7 +506,7 @@ Shader "Custom/TerrainFromNoiseMap_PixelPerfect"
                     + rock2     * wRock2;
 
                 // Снег поверх
-                result.rgb = lerp(result.rgb, snow.rgb, wSnow);
+                result.rgb = lerp(result.rgb, snow.rgb, wSnow * (1.0 - track.g * _SnowTrailReveal));
 
                 return result;
             }

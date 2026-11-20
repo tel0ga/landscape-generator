@@ -70,7 +70,7 @@ namespace SurvivalCombat
             nextAttack = clock + 60f / Mathf.Max(1, def.attacksPerMinute);
             var damage = new DamageInfo { attackId = Guid.NewGuid().ToString("N"), owner = actor.Health, damage = stats.damage,
                 type = def.damageType, criticalChance = def.criticalChance, criticalMultiplier = def.criticalMultiplier,
-                knockback = def.knockback, direction = context.direction, effect = def.effect.Copy() };
+                knockback = def.knockback, direction = context.mapDirection, effect = def.effect.Copy() };
             if (def.attackKind == AttackKind.Melee)
             {
                 meleeContext = context; meleeDamage = damage; meleeDefinition = def; hitThisSwing.Clear();

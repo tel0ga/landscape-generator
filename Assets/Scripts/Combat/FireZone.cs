@@ -12,7 +12,7 @@ namespace SurvivalCombat
             var zone = go.GetComponent<FireZone>(); zone.pool = pool; zone.owner = owner;
             zone.expires = Time.time + profile.fireDuration; zone.nextTick = Time.time;
             zone.interval = Mathf.Max(.1f, profile.fireInterval); zone.radius = profile.radius; zone.damage = profile.damage * .12f;
-            go.transform.position = position; go.transform.localScale = new Vector3(profile.radius * 2, profile.radius * 2, 1); go.SetActive(true);
+            go.transform.position = position; go.transform.localScale = new Vector3(profile.radius * 2, profile.radius * 2 * WorldProjection.VerticalScale, 1); go.SetActive(true);
         }
         void Update()
         {

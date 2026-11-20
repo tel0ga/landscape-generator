@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public static class MeshGenerator
 {
@@ -19,6 +19,8 @@ public static class MeshGenerator
         meshData.vertices[1] = new Vector3(topLeftX + worldWidth, topLeftY, 0);
         meshData.vertices[2] = new Vector3(topLeftX, topLeftY - worldHeight, 0);
         meshData.vertices[3] = new Vector3(topLeftX + worldWidth, topLeftY - worldHeight, 0);
+
+        for (int i = 0; i < meshData.vertices.Length; i++) meshData.vertices[i] = WorldProjection.ProjectPosition(meshData.vertices[i]);
 
         meshData.uvs[0] = new Vector2(0, 1);
         meshData.uvs[1] = new Vector2(1, 1);

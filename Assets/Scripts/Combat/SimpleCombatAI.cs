@@ -13,7 +13,7 @@ namespace SurvivalCombat
             var current = actor.Equipment.Current;
             if (current == null) return;
             var definition = actor.Catalog.Weapon(current.definitionId);
-            if (Vector2.Distance(transform.position, target.transform.position) > definition.range || CombatPhysics.WallBetween(transform.position, target.transform.position)) return;
+            if (WorldProjection.Distance(transform.position, target.transform.position) > definition.range || CombatPhysics.WallBetween(transform.position, target.transform.position)) return;
             if (definition.attackKind != AttackKind.Melee && current.ammoInMagazine == 0) actor.Weapons.TryStartReload();
             else actor.Weapons.TryAttack(actor.Aim.Context);
         }
